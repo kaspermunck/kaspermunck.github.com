@@ -1,5 +1,19 @@
-auto: false
-markdown: rdiscount
 permalink: /:year/:month/:title
-rdiscount extensions: [smart]
+
+markdown: redcarpet
+
+exclude: ["README.md", "Rakefile"]
+auto: false
 pygments: true
+
+title: "Kasper Munck"
+author:
+  name: "Kasper Munck"
+  email: kasper@muncken.dk
+  github: kaspermunck
+  twitter: kaspermunck
+
+production_url: http://kaspermunck.github.io
+
+analytics:
+  google_id: "UA-31685958-1"
