@@ -5,6 +5,7 @@ markdown: redcarpet
 exclude: ["README.md", "Rakefile"]
 auto: false
 pygments: true
+safe: false
 
 title: "Kasper Munck"
 author:
