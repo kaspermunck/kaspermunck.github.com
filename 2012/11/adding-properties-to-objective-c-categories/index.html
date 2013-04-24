@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="Kasper Munck">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Adding Properties to Objective-C Categories</title>
+
+    <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
+    <link href='/assets/global-bb271386cfe07e7477b96015526d4ceb.css' rel='stylesheet' type='text/css' />
+
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">Kasper Munck</a></h1>
+    </div>
+
+    <div class="row">
+      <div class="content">
+  <div id="post">
+  	<h2>Adding Properties to Objective-C Categories</h2>
+    <time class="date">November 02, 2012</time>
+    <h3>Categories, Properties and Ivars</h3>
+
+<p>Today I had to add an extra property to a category on an <code>NSManagedObject</code>. The property is a bool used to determine the state of the <code>UITableViewCell</code> that is supposed to show info from the MO, so it does not need to be stored anywhere. Because of that fact I decided that a category would be the perfect solution. But adding a property to a categor y gives the following error:</p>
+<div class="highlight"><pre><code class="text">@synthesize not allowed in a category&#39;s implementation.
+</code></pre></div>
+<p>Adding an ivar to a category and implement setter/getter manually is a no-go as well. An attempt will also result in an error:</p>
+<div class="highlight"><pre><code class="text">Ivars may not be placed in categories.  
+</code></pre></div>
+<p>At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>&quot;[…] simulate the addition of object instance variables to an existing class&quot;</em>. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p>
+</blockquote></p>
+
+<p><strong>MyManagedObject+Additions.h</strong></p>
+<div class="highlight"><pre><code class="text">@property (getter=isRedefinition) BOOL redefined;
+</code></pre></div>
+<p><strong>MyManagedObject+Additions.m</strong></p>
+<div class="highlight"><pre><code class="text">NSString const *redefined_key = @&quot;my.very.unique.key&quot;;
+
+- (void)setRedefined:(BOOL)redefined
+{
+objc\_setAssociatedObject(self, &amp;amp;redefined\_key, [NSNumber numberWithBool:redefined], OBJC\_ASSOCIATION\_RETAIN_NONATOMIC);
+}
+
+- (BOOL)isRedefinition
+{
+return [objc\_getAssociatedObject(self, &amp;amp;redefined\_key) boolValue];
+}
+</code></pre></div>
+<h3>Updates</h3>
+
+<h4>12/03/2012</h4>
+
+<p>Another great article about associated objects / references is now available at the <a href="http://blog.carbonfive.com/2012/11/27/monkey-patching-ios-with-objective-c-categories-part-ii-adding-instance-properties/">Carbon Emitter blog</a>.</p>
+
+<h4>11/12/2012</h4>
+
+<p>The article <a href="http://www.merowing.info/2012/02/associated-objects-for-more-advanced-categories/">Advanced categories with associated objects</a> by Krysztof Zablocki digs a little deeper with categories and associated objects. It&#39;s absolutely worth a read.</p>
+
+
+    
+
+    
+    [<span class="categories">
+    
+    	property
+    
+    	category
+    
+    	objective-c
+    
+    </span>]
+
+  </div>
+</div>
+
+    </div>
+
+    <div class="row">
+      <section id="footer">
+  <div class="social">
+	<a href="http://github.com/kaspermunck" target="_blank" class="github">
+		<i class="icon-github-alt icon-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
+		<i class="icon-twitter icon-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
+		<i class="icon-linkedin icon-2x"></i>
+	</a>
+  </div>
+
+  <div class="goodbye">&copy; 2013 Kasper Munck<br />Powered by Jekyll, Bootstrap & Github</div>
+</section>
+    </div>
+  </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31685958-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  </body>
+</html>
