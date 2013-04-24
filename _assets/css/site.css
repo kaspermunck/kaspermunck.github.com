@@ -18,6 +18,12 @@
 	padding: 0;
 }
 
+#post img {
+	display: block;
+	margin: 20px auto;
+	width: 50%;
+}
+
 .post-listing {
 	padding: 12px 0;
 	border-bottom: 1px solid #eee;
