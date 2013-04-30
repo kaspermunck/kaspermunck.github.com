@@ -8,7 +8,8 @@
     <title>Testing a View Controller's IBOutlet Connections</title>
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
-    <link href='/assets/global-66bf33631df944109980e779f2f01d57.css' rel='stylesheet' type='text/css' />
+
+    <link href='/assets/global-9696121e1d8220bb65a08f2a71540060.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -26,9 +27,11 @@
     <h3>When Using Nib Files</h3>
 
 <p>Understanding how a ViewController&#39;s view hierarchy is loaded is essential when testing UI related stuff. Consider the following test case, which verifies that an IBOutlet connection to <code>myLabel</code> has been established when a view controller is loaded:</p>
-<div class="highlight"><pre><code class="text">MyViewController *vc = [[MyViewController alloc] initWithNibName:@&quot;MyViewController&quot; bundle:nil];
-STAssertNotNil(vc.myLabel, @&quot;Should connect myLabel IBOutlet.&quot;);
+
+<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithNibName:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
+<span class="n">STAssertNotNil</span><span class="p">(</span><span class="n">vc</span><span class="p">.</span><span class="n">myLabel</span><span class="p">,</span> <span class="s">@&quot;Should connect myLabel IBOutlet.&quot;</span><span class="p">);</span>
 </code></pre></div>
+
 <p>The test will always fail, telling you that <code>vc.myLabel</code> is nil. There is a very good reason for that. <a href="http://developer.apple.com/library/ios/#featuredarticles/ViewControllerPGforiPhoneOS/ViewLoadingandUnloading/ViewLoadingandUnloading.html">Apple&#39;s View Controller Programmer Guide for iOS</a> illustrates a view controller&#39;s loading and unloading sequence: </p>
 
 <p><img class="align-center" title="Instantiating View Hierarchy" src="http://developer.apple.com/library/ios/featuredarticles/ViewControllerPGforiPhoneOS/Art/loading_a_view_into_memory_2x.png" width="355" height="302" /></p>
@@ -40,10 +43,12 @@ STAssertNotNil(vc.myLabel, @&quot;Should connect myLabel IBOutlet.&quot;);
 </blockquote>
 
 <p>This explains why <code>myLabel</code> is always nil in the test case above; it has not yet been loaded, since I haven&#39;t accessed the view property yet. Let&#39;s add some code to verify it:</p>
-<div class="highlight"><pre><code class="text">MyViewController *vc = [[MyViewController alloc] initWithNibName:@&quot;MyViewController&quot; bundle:nil];
-[vc view]; // load view hierarchy
-STAssertNotNil(vc.myLabel, @&quot;Should connect myLabel IBOutlet.&quot;);
+
+<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithNibName:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
+<span class="p">[</span><span class="n">vc</span> <span class="n">view</span><span class="p">];</span> <span class="c1">// load view hierarchy</span>
+<span class="n">STAssertNotNil</span><span class="p">(</span><span class="n">vc</span><span class="p">.</span><span class="n">myLabel</span><span class="p">,</span> <span class="s">@&quot;Should connect myLabel IBOutlet.&quot;</span><span class="p">);</span>
 </code></pre></div>
+
 <p>Now, as opposed to before, the test passes. And it makes sense, because - when asking for the view - I access the view property of MyViewController which will load the view hierarchy into memory if not already loaded.</p>
 
 <h3>When using Storyboards</h3>
@@ -60,15 +65,16 @@ STAssertNotNil(vc.myLabel, @&quot;Should connect myLabel IBOutlet.&quot;);
 <p><img src="/images/storyboard-identifier.png" alt="Storyboard viewcontroller identifier"></p>
 
 <p>Now, when initializing <code>MyViewController</code> from test code, use the following two lines of code:</p>
-<div class="highlight"><pre><code class="text">UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@&quot;Storyboard&quot; bundle:nil];
-MyViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@&quot;MyViewController&quot;];
+
+<div class="highlight"><pre><code class="objc"><span class="n">UIStoryboard</span> <span class="o">*</span><span class="n">storyboard</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIStoryboard</span> <span class="nl">storyboardWithName:</span><span class="s">@&quot;Storyboard&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
+<span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[</span><span class="n">storyboard</span> <span class="nl">instantiateViewControllerWithIdentifier:</span><span class="s">@&quot;MyViewController&quot;</span><span class="p">];</span>
 </code></pre></div>
+
 <p>With this approach we don&#39;t even have to invoke the view property, since the view hierarchy has already been loaded at this time.</p>
 
 
     
 
-    
     [<span class="categories">
     
     	unit test

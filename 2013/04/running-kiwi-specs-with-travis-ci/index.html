@@ -8,7 +8,8 @@
     <title>Running iOS Application Unit Tests with Travis-CI</title>
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
-    <link href='/assets/global-66bf33631df944109980e779f2f01d57.css' rel='stylesheet' type='text/css' />
+
+    <link href='/assets/global-9696121e1d8220bb65a08f2a71540060.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -47,15 +48,17 @@
 <p>Try <code>cmd+u</code> again and everything should be fine. </p>
 
 <p>Now delete <code>MyAppTests.h</code> and replace the contents of <code>MyAppTests.m</code> with:</p>
-<div class="highlight"><pre><code class="text">SPEC_BEGIN(ViewControllerSpecs)
 
-// logic test
-it(@&quot;should always succeed&quot;, ^{
-    [[theValue(YES) should] equal:theValue(YES)];
-});
+<div class="highlight"><pre><code class="objc"><span class="n">SPEC_BEGIN</span><span class="p">(</span><span class="n">ViewControllerSpecs</span><span class="p">)</span>
 
-SPEC_END
+<span class="c1">// logic test</span>
+<span class="n">it</span><span class="p">(</span><span class="s">@&quot;should always succeed&quot;</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+    <span class="p">[[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)];</span>
+<span class="p">});</span>
+
+<span class="n">SPEC_END</span>
 </code></pre></div>
+
 <p>Run tests with <code>cmd+u</code> and verify that it succeeds.</p>
 
 <h3>Testing From the Terminal</h3>
@@ -75,45 +78,55 @@ SPEC_END
 <p>Done. </p>
 
 <p>Xcode has a command line utility named <a href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/xcodebuild.1.html">xcodebuild</a> with which you can build from outside of Xcode. By passing it <code>TEST_AFTER_BUILD=YES</code> we can run tests from the command line. Note that we set the sdk to iphonesimulator; if you don&#39;t do that you might wind up with signing errors. Run this from the command line:</p>
-<div class="highlight"><pre><code class="text">xcodebuild -workspace MyApp.xcworkspace -scheme MyAppTests -sdk iphonesimulator -configuration Release TEST_AFTER_BUILD=YES
+
+<div class="highlight"><pre><code class="sh">xcodebuild -workspace MyApp.xcworkspace -scheme MyAppTests -sdk iphonesimulator -configuration Release <span class="nv">TEST_AFTER_BUILD</span><span class="o">=</span>YES
 </code></pre></div>
+
 <p>The parameters pretty much explain themselves. It will output plenty of stuff, but you only need to verify that, somewhere near the bottom, it reads:</p>
 <div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
 </code></pre></div>
 <p>I like <a href="http://en.wikipedia.org/wiki/Test-driven_development">TDD</a> so I prefer seeing a test breaking before passing, so let&#39;s try and break our test:</p>
-<div class="highlight"><pre><code class="text">[[theValue(YES) should] equal:theValue(NO)];
+
+<div class="highlight"><pre><code class="objc"><span class="p">[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">NO</span><span class="p">)];</span>
 </code></pre></div>
+
 <p>And hit <code>cmd+u</code> to see it break (in Xcode). After that, run it from command line again. The output should still be: </p>
 <div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
 </code></pre></div>
 <p>Hmm. What happens when we run our tests is that a script named RunPlatformUnitTests, located in <code>/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools/</code> is run. In RunPlatformUnitTests&#39;s main function it reads:</p>
-<div class="highlight"><pre><code class="text">if [ &quot;${TEST_HOST}&quot; != &quot;&quot; ]; then
-    # All applications are tested the same way, by injecting a bundle.
-    # The bundle needs to configure and run the tests itself somehow.
 
-    RunTestsForApplication &quot;${TEST_HOST}&quot; &quot;${TEST_BUNDLE_PATH}&quot;
-else
-    # If no TEST_HOST is specified, assume we&#39;re running the test bundle.
+<div class="highlight"><pre><code class="sh"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;${TEST_HOST}&quot;</span> !<span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+    <span class="c"># All applications are tested the same way, by injecting a bundle.</span>
+    <span class="c"># The bundle needs to configure and run the tests itself somehow.</span>
 
-    RunTestsForBundle &quot;${TEST_BUNDLE_PATH}&quot;
-fi
+    RunTestsForApplication <span class="s2">&quot;${TEST_HOST}&quot;</span> <span class="s2">&quot;${TEST_BUNDLE_PATH}&quot;</span>
+<span class="k">else</span>
+    <span class="c"># If no TEST_HOST is specified, assume we&#39;re running the test bundle.</span>
+    
+    RunTestsForBundle <span class="s2">&quot;${TEST_BUNDLE_PATH}&quot;</span>
+<span class="k">fi</span>
 </code></pre></div>
+
 <p>By investigating the script further, we find this:</p>
-<div class="highlight"><pre><code class="text">RunTestsForApplication() {
-Warning ${LINENO} &quot;Skipping tests; the iPhoneSimulator platform does not currently support application-hosted tests (TEST_HOST set).&quot;
-}
+
+<div class="highlight"><pre><code class="sh">RunTestsForApplication<span class="o">()</span> <span class="o">{</span>
+Warning <span class="k">${</span><span class="nv">LINENO</span><span class="k">}</span> <span class="s2">&quot;Skipping tests; the iPhoneSimulator platform does not currently support application-hosted tests (TEST_HOST set).&quot;</span>
+<span class="o">}</span>
 </code></pre></div>
+
 <p>Interesting. Let&#39;s try to add <code>TEST_HOST=&#39;&#39;</code> to the end of the build command and run it again to see if we can fool the build script. Run the tests from the terminal again. The output should now read something similar to:</p>
 <div class="highlight"><pre><code class="text">Executed 1 test, with 1 failure (1 unexpected) in 0.022 (0.023) seconds
 </code></pre></div>
 <p>It worked! So far, atl east. Now create a ViewController with a nib file (don&#39;t forget to add it to the test target). Add a <code>UIButton</code> to the view and connect it to an IBOutlet named <code>button</code>. Then, in the test file, add a new spec:</p>
-<div class="highlight"><pre><code class="text">// application test
-it(@&quot;should connect button&quot;, ^{
-    ViewController *vc = [[ViewController alloc] init];
-    [vc view]; // init view hierarchy
-    [vc.button shouldNotBeNil]; // test IBOutlet connection
-});
+
+<div class="highlight"><pre><code class="objc"><span class="c1">// application test</span>
+<span class="n">it</span><span class="p">(</span><span class="s">@&quot;should connect button&quot;</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+    <span class="n">ViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">vc</span> <span class="n">view</span><span class="p">];</span> <span class="c1">// init view hierarchy</span>
+    <span class="p">[</span><span class="n">vc</span><span class="p">.</span><span class="n">button</span> <span class="n">shouldNotBeNil</span><span class="p">];</span> <span class="c1">// test IBOutlet connection</span>
+<span class="p">});</span>
 </code></pre></div>
+
 <p>Fix the other spec (revert <code>NO</code> to <code>YES</code>) and hit <code>cmd+u</code>. The tests pass. Now run the tests from the terminal again.</p>
 <div class="highlight"><pre><code class="text">/Applications/Xcode.app/Contents/Developer/Tools/RunPlatformUnitTests.include:448: error: Failed tests for architecture &#39;i386&#39; (GC OFF)
 
@@ -132,16 +145,22 @@ it(@&quot;should connect button&quot;, ^{
 </blockquote>
 
 <p>XcodeTest depends on <a href="https://github.com/jonathanpenn/WaxSim">WaxSim</a> which is <em>A wrapper around iPhoneSimulatorRemoteClient, to install and run apps in the iOS simulator.</em> Install WaxSim by first cloning the repo:</p>
-<div class="highlight"><pre><code class="text">git clone https://github.com/jonathanpenn/WaxSim.git
+
+<div class="highlight"><pre><code class="sh">git clone https://github.com/jonathanpenn/WaxSim.git
 </code></pre></div>
+
 <p>Then, <code>cd WaxSim</code> and run:</p>
-<div class="highlight"><pre><code class="text">sudo xcodebuild install DSTROOT=/ INSTALL_PATH=/usr/local/bin
+
+<div class="highlight"><pre><code class="sh">sudo xcodebuild install <span class="nv">DSTROOT</span><span class="o">=</span>/ <span class="nv">INSTALL_PATH</span><span class="o">=</span>/usr/local/bin
 </code></pre></div>
+
 <p>Now, follow the installation guide in XcodeTest&#39;s README. Beware,  <code>build_and_run_unit_tests.sh</code> <a href="https://gist.github.com/kaspermunck/5375284">might need to be tweeked</a> in order to make it work with Kiwi, since we installed it with CocoaPods and are therefore using a workspace. </p>
 
 <p>OK, now run the tests again with XcodeTest:</p>
-<div class="highlight"><pre><code class="text">./build_and_run_unit_tests.sh MyApp MyAppTests
+
+<div class="highlight"><pre><code class="sh">./build_and_run_unit_tests.sh MyApp MyAppTests
 </code></pre></div>
+
 <p>You should see it build, open the simulator and run the tests (both application and logic) without any problems. For the sake of verification, break and fix your tests a few times to see that it works properly.</p>
 
 <h3>Travis-CI</h3>
@@ -180,7 +199,6 @@ Unit Tests Passed
 
     
 
-    
     [<span class="categories">
     
     	travis-ci

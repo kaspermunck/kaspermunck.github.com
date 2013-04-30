@@ -8,7 +8,8 @@
     <title>Adding Properties to Objective-C Categories</title>
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
-    <link href='/assets/global-66bf33631df944109980e779f2f01d57.css' rel='stylesheet' type='text/css' />
+
+    <link href='/assets/global-9696121e1d8220bb65a08f2a71540060.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -31,25 +32,28 @@
 <p>Adding an ivar to a category and implement setter/getter manually is a no-go as well. An attempt will also result in an error:</p>
 <div class="highlight"><pre><code class="text">Ivars may not be placed in categories.  
 </code></pre></div>
-<p>At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>&quot;[…] simulate the addition of object instance variables to an existing class&quot;</em>. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p>
-</blockquote></p>
+<p>At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>[…] simulate the addition of object instance variables to an existing class</em>. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p></p>
 
 <p><strong>MyManagedObject+Additions.h</strong></p>
-<div class="highlight"><pre><code class="text">@property (getter=isRedefinition) BOOL redefined;
+
+<div class="highlight"><pre><code class="objc"><span class="k">@property</span> <span class="p">(</span><span class="n">getter</span><span class="o">=</span><span class="n">isRedefinition</span><span class="p">)</span> <span class="kt">BOOL</span> <span class="n">redefined</span><span class="p">;</span>
 </code></pre></div>
+
 <p><strong>MyManagedObject+Additions.m</strong></p>
-<div class="highlight"><pre><code class="text">NSString const *redefined_key = @&quot;my.very.unique.key&quot;;
 
-- (void)setRedefined:(BOOL)redefined
-{
-objc\_setAssociatedObject(self, &amp;amp;redefined\_key, [NSNumber numberWithBool:redefined], OBJC\_ASSOCIATION\_RETAIN_NONATOMIC);
-}
+<div class="highlight"><pre><code class="objc"><span class="n">NSString</span> <span class="k">const</span> <span class="o">*</span><span class="n">redefined_key</span> <span class="o">=</span> <span class="s">@&quot;my.very.unique.key&quot;</span><span class="p">;</span>
 
-- (BOOL)isRedefinition
-{
-return [objc\_getAssociatedObject(self, &amp;amp;redefined\_key) boolValue];
-}
+<span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setRedefined:</span><span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nv">redefined</span>
+<span class="p">{</span>
+    <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">redefined_key</span><span class="p">,</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithBool:</span><span class="n">redefined</span><span class="p">],</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">isRedefinition</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">redefined_key</span><span class="p">)</span> <span class="n">boolValue</span><span class="p">];</span>
+<span class="p">}</span>
 </code></pre></div>
+
 <h3>Updates</h3>
 
 <h4>12/03/2012</h4>
@@ -63,7 +67,6 @@ return [objc\_getAssociatedObject(self, &amp;amp;redefined\_key) boolValue];
 
     
 
-    
     [<span class="categories">
     
     	property
