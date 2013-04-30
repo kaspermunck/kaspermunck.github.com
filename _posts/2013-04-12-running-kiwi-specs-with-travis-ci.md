@@ -38,14 +38,16 @@ Try `cmd+u` again and everything should be fine.
 
 Now delete `MyAppTests.h` and replace the contents of `MyAppTests.m` with:
 
-    SPEC_BEGIN(ViewControllerSpecs)
+{% highlight objc %}
+SPEC_BEGIN(ViewControllerSpecs)
 
-	// logic test
-    it(@"should always succeed", ^{
-        [[theValue(YES) should] equal:theValue(YES)];
-    });
+// logic test
+it(@"should always succeed", ^{
+    [[theValue(YES) should] equal:theValue(YES)];
+});
 
-	SPEC_END
+SPEC_END
+{% endhighlight %}
 	
 Run tests with `cmd+u` and verify that it succeeds.
 
@@ -67,7 +69,9 @@ Done.
 
 Xcode has a command line utility named [xcodebuild](https://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/xcodebuild.1.html) with which you can build from outside of Xcode. By passing it `TEST_AFTER_BUILD=YES` we can run tests from the command line. Note that we set the sdk to iphonesimulator; if you don't do that you might wind up with signing errors. Run this from the command line:
 
-    xcodebuild -workspace MyApp.xcworkspace -scheme MyAppTests -sdk iphonesimulator -configuration Release TEST_AFTER_BUILD=YES
+{% highlight sh %}
+xcodebuild -workspace MyApp.xcworkspace -scheme MyAppTests -sdk iphonesimulator -configuration Release TEST_AFTER_BUILD=YES
+{% endhighlight %}
 
 The parameters pretty much explain themselves. It will output plenty of stuff, but you only need to verify that, somewhere near the bottom, it reads:
 
@@ -75,30 +79,36 @@ The parameters pretty much explain themselves. It will output plenty of stuff, b
 
 I like [TDD](http://en.wikipedia.org/wiki/Test-driven_development) so I prefer seeing a test breaking before passing, so let's try and break our test:
 
-    [[theValue(YES) should] equal:theValue(NO)];
-	
+{% highlight objc %}
+[theValue(YES) should] equal:theValue(NO)];
+{% endhighlight %}
+
 And hit `cmd+u` to see it break (in Xcode). After that, run it from command line again. The output should still be: 
 
     ** BUILD SUCCEEDED **
 
 Hmm. What happens when we run our tests is that a script named RunPlatformUnitTests, located in `/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools/` is run. In RunPlatformUnitTests's main function it reads:
 
-    if [ "${TEST_HOST}" != "" ]; then
-        # All applications are tested the same way, by injecting a bundle.
-        # The bundle needs to configure and run the tests itself somehow.
+{% highlight sh %}
+if [ "${TEST_HOST}" != "" ]; then
+    # All applications are tested the same way, by injecting a bundle.
+    # The bundle needs to configure and run the tests itself somehow.
 
-        RunTestsForApplication "${TEST_HOST}" "${TEST_BUNDLE_PATH}"
-    else
-        # If no TEST_HOST is specified, assume we're running the test bundle.
-        
-        RunTestsForBundle "${TEST_BUNDLE_PATH}"
-    fi
+    RunTestsForApplication "${TEST_HOST}" "${TEST_BUNDLE_PATH}"
+else
+    # If no TEST_HOST is specified, assume we're running the test bundle.
+    
+    RunTestsForBundle "${TEST_BUNDLE_PATH}"
+fi
+{% endhighlight %}
     
 By investigating the script further, we find this:
 
-    RunTestsForApplication() {
-    Warning ${LINENO} "Skipping tests; the iPhoneSimulator platform does not currently support application-hosted tests (TEST_HOST set)."
-    }
+{% highlight sh %}
+RunTestsForApplication() {
+Warning ${LINENO} "Skipping tests; the iPhoneSimulator platform does not currently support application-hosted tests (TEST_HOST set)."
+}
+{% endhighlight %}
 
 Interesting. Let's try to add `TEST_HOST=''` to the end of the build command and run it again to see if we can fool the build script. Run the tests from the terminal again. The output should now read something similar to:
 
@@ -106,12 +116,14 @@ Interesting. Let's try to add `TEST_HOST=''` to the end of the build command and
     
 It worked! So far, atl east. Now create a ViewController with a nib file (don't forget to add it to the test target). Add a `UIButton` to the view and connect it to an IBOutlet named `button`. Then, in the test file, add a new spec:
 
-	// application test
-    it(@"should connect button", ^{
-        ViewController *vc = [[ViewController alloc] init];
-        [vc view]; // init view hierarchy
-        [vc.button shouldNotBeNil]; // test IBOutlet connection
-    });
+{% highlight objc %}
+// application test
+it(@"should connect button", ^{
+    ViewController *vc = [[ViewController alloc] init];
+    [vc view]; // init view hierarchy
+    [vc.button shouldNotBeNil]; // test IBOutlet connection
+});
+{% endhighlight %}
 
 Fix the other spec (revert `NO` to `YES`) and hit `cmd+u`. The tests pass. Now run the tests from the terminal again.
 
@@ -131,18 +143,24 @@ To get any further from here we'll use [XcodeTest](https://github.com/sgleadow/x
 
 XcodeTest depends on [WaxSim](https://github.com/jonathanpenn/WaxSim) which is _A wrapper around iPhoneSimulatorRemoteClient, to install and run apps in the iOS simulator._ Install WaxSim by first cloning the repo:
 
-    git clone https://github.com/jonathanpenn/WaxSim.git
-    
+{% highlight sh %}
+git clone https://github.com/jonathanpenn/WaxSim.git
+{% endhighlight %}
+
 Then, `cd WaxSim` and run:
 
-    sudo xcodebuild install DSTROOT=/ INSTALL_PATH=/usr/local/bin
+{% highlight sh %}
+sudo xcodebuild install DSTROOT=/ INSTALL_PATH=/usr/local/bin
+{% endhighlight %}
 
 Now, follow the installation guide in XcodeTest's README. Beware,  `build_and_run_unit_tests.sh` [might need to be tweeked](https://gist.github.com/kaspermunck/5375284) in order to make it work with Kiwi, since we installed it with CocoaPods and are therefore using a workspace. 
 
 OK, now run the tests again with XcodeTest:
 
-    ./build_and_run_unit_tests.sh MyApp MyAppTests
-    
+{% highlight sh %}
+./build_and_run_unit_tests.sh MyApp MyAppTests
+{% endhighlight %}
+
 You should see it build, open the simulator and run the tests (both application and logic) without any problems. For the sake of verification, break and fix your tests a few times to see that it works properly.
 
 ### Travis-CI

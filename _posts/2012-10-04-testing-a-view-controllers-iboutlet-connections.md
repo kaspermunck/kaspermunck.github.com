@@ -13,10 +13,10 @@ categories:
 
 Understanding how a ViewController's view hierarchy is loaded is essential when testing UI related stuff. Consider the following test case, which verifies that an IBOutlet connection to `myLabel` has been established when a view controller is loaded:
 
-````
+{% highlight objc %}
 MyViewController *vc = [[MyViewController alloc] initWithNibName:@"MyViewController" bundle:nil];
 STAssertNotNil(vc.myLabel, @"Should connect myLabel IBOutlet.");
-````
+{% endhighlight %}
 
 The test will always fail, telling you that `vc.myLabel` is nil. There is a very good reason for that. [Apple's View Controller Programmer Guide for iOS](http://developer.apple.com/library/ios/#featuredarticles/ViewControllerPGforiPhoneOS/ViewLoadingandUnloading/ViewLoadingandUnloading.html) illustrates a view controller's loading and unloading sequence: 
 
@@ -28,11 +28,11 @@ It is described as follows:
 
 This explains why `myLabel` is always nil in the test case above; it has not yet been loaded, since I haven't accessed the view property yet. Let's add some code to verify it:
 
-````
+{% highlight objc %}
 MyViewController *vc = [[MyViewController alloc] initWithNibName:@"MyViewController" bundle:nil];
 [vc view]; // load view hierarchy
 STAssertNotNil(vc.myLabel, @"Should connect myLabel IBOutlet.");
-````
+{% endhighlight %}
 
 Now, as opposed to before, the test passes. And it makes sense, because - when asking for the view - I access the view property of MyViewController which will load the view hierarchy into memory if not already loaded.
 
@@ -49,9 +49,9 @@ Assume a storboard with `MyViewController` in it. First, in the Storyboard, sele
 
 Now, when initializing `MyViewController` from test code, use the following two lines of code:
 
-````
+{% highlight objc %}
 UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Storyboard" bundle:nil];
 MyViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"MyViewController"];
-````
+{% endhighlight %}
 
 With this approach we don't even have to invoke the view property, since the view hierarchy has already been loaded at this time.

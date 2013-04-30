@@ -88,3 +88,15 @@ a {
 	font-size: .75em;
 	font-family: 'district_prothin';
 }
+
+code {
+	color: #999;
+}
+
+.highlight {
+	margin: 20px 0;
+}
+
+.highlight code {
+	font-size: .75em;
+}

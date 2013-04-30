@@ -17,30 +17,33 @@ Today I had to add an extra property to a category on an `NSManagedObject`. The 
     
 Adding an ivar to a category and implement setter/getter manually is a no-go as well. An attempt will also result in an error:
 
+
     Ivars may not be placed in categories.  
-    
-At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called [associated objects](http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html), which will _"[…] simulate the addition of object instance variables to an existing class"_. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p>
-</blockquote>
+
+
+At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called [associated objects](http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html), which will _[…] simulate the addition of object instance variables to an existing class_. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p>
 
 **MyManagedObject+Additions.h**
 
-    @property (getter=isRedefinition) BOOL redefined;
+{% highlight objc %}
+@property (getter=isRedefinition) BOOL redefined;
+{% endhighlight %}
 
 **MyManagedObject+Additions.m**
 
-````
+{% highlight objc %}
 NSString const *redefined_key = @"my.very.unique.key";
 
 - (void)setRedefined:(BOOL)redefined
 {
-objc\_setAssociatedObject(self, &amp;redefined\_key, [NSNumber numberWithBool:redefined], OBJC\_ASSOCIATION\_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(self, &redefined_key, [NSNumber numberWithBool:redefined], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)isRedefinition
 {
-return [objc\_getAssociatedObject(self, &amp;redefined\_key) boolValue];
+	return [objc_getAssociatedObject(self, &redefined_key) boolValue];
 }
-````
+{% endhighlight %}
 
 ### Updates
 
