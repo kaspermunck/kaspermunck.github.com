@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-6b0b61a7f4d7712d204393311722efd3.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-30b0ab50b60f23debc3436e547dbd7a0.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -24,7 +24,13 @@
   <div id="post">
   	<h2>Running iOS Application Unit Tests with Travis-CI</h2>
     <time class="date">April 12, 2013</time>
-    <p><a href="http://travis-ci.org">Travis</a> has just <a href="http://about.travis-ci.org/blog/introducing-mac-ios-rubymotion-testing/">announced support for Objective-C projects</a>. Unfortunately, Travis supports only logic unit tests (more on that later) out of the box. However, with a few extra steps (thanks to Travis for being extremely customizable), support for application unit tests becomes a reality as well. WIth a little help from some <a href="https://github.com/sgleadow/xcodetest">awesome</a> <a href="https://github.com/jonathanpenn/WaxSim">tools</a> I managed to make it work. </p>
+    <h3>Update 5/2-2013: <a href="https://github.com/facebook/xctool">xctool</a></h3>
+
+<p>Facebook has released <code>xctool</code>, which is <em>a replacement for Apple&#39;s xcodebuild that makes it easier to build and test iOS and Mac products</em>. It solves the problem with running application unit tests from the command line and in addition to that, it&#39;s a simpler and improved interface to <code>xcodebuild</code>. You should use <code>xctool</code> instead of <code>xcodebuild</code>. However, if you experience difficulties with Kiwi and Travis-CI, then read on.</p>
+
+<hr>
+
+<p><a href="http://travis-ci.org">Travis</a> has just <a href="http://about.travis-ci.org/blog/introducing-mac-ios-rubymotion-testing/">announced support for Objective-C projects</a>. Unfortunately, Travis supports only logic unit tests (more on that later) out of the box. However, with a few extra steps (thanks to Travis for being extremely customizable), support for application unit tests becomes a reality as well. WIth a little help from some <a href="https://github.com/sgleadow/xcodetest">awesome</a> <a href="https://github.com/jonathanpenn/WaxSim">tools</a> I managed to make it work. </p>
 
 <p>My preferred testing framework is <a href="https://github.com/allending/Kiwi">Kiwi</a>, but this approach will do for any other testing for iOS.</p>
 
@@ -45,7 +51,7 @@
 <p>to</p>
 <div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot;
 </code></pre></div>
-<p>Try <code>cmd+u</code> again and everything should be fine. </p>
+<p>This is a <a href="https://github.com/CocoaPods/CocoaPods/issues/956">known issue</a> which has to be addressed. Hit <code>cmd+u</code> again and everything should be fine. </p>
 
 <p>Now delete <code>MyAppTests.h</code> and replace the contents of <code>MyAppTests.m</code> with:</p>
 
