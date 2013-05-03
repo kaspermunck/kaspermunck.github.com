@@ -10,6 +10,12 @@ categories:
 - xcodebuild
 ---
 
+### Update 5/2-2013: [xctool](https://github.com/facebook/xctool)
+
+Facebook has released `xctool`, which is _a replacement for Apple's xcodebuild that makes it easier to build and test iOS and Mac products_. It solves the problem with running application unit tests from the command line and in addition to that, it's a simpler and improved interface to `xcodebuild`. You should use `xctool` instead of `xcodebuild`. However, if you experience difficulties with Kiwi and Travis-CI, then read on.
+
+---
+
 [Travis](http://travis-ci.org) has just [announced support for Objective-C projects](http://about.travis-ci.org/blog/introducing-mac-ios-rubymotion-testing/). Unfortunately, Travis supports only logic unit tests (more on that later) out of the box. However, with a few extra steps (thanks to Travis for being extremely customizable), support for application unit tests becomes a reality as well. WIth a little help from some [awesome](https://github.com/sgleadow/xcodetest) [tools](https://github.com/jonathanpenn/WaxSim) I managed to make it work. 
 
 My preferred testing framework is [Kiwi](https://github.com/allending/Kiwi), but this approach will do for any other testing for iOS.
@@ -34,7 +40,7 @@ to
 
     FRAMEWORK_SEARCH_PATHS = $(inherited) "$(SDKROOT)/Developer/Library/Frameworks" "$(DEVELOPER_LIBRARY_DIR)/Frameworks"
 
-Try `cmd+u` again and everything should be fine. 
+This is a [known issue](https://github.com/CocoaPods/CocoaPods/issues/956) which has to be addressed. Hit `cmd+u` again and everything should be fine. 
 
 Now delete `MyAppTests.h` and replace the contents of `MyAppTests.m` with:
 
