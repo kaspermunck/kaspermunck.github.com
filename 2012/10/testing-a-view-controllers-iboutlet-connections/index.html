@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-78b1f73dd413e65f57eeac2628cd630d.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -28,11 +28,11 @@
 
 <p>Understanding how a ViewController&#39;s view hierarchy is loaded is essential when testing UI related stuff. Consider the following test case, which verifies that an IBOutlet connection to <code>myLabel</code> has been established when a view controller is loaded:</p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithNibName:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
+<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithNibName</span><span class="o">:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="n">bundle</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
 <span class="n">STAssertNotNil</span><span class="p">(</span><span class="n">vc</span><span class="p">.</span><span class="n">myLabel</span><span class="p">,</span> <span class="s">@&quot;Should connect myLabel IBOutlet.&quot;</span><span class="p">);</span>
 </code></pre></div>
 
-<p>The test will always fail, telling you that <code>vc.myLabel</code> is nil. There is a very good reason for that. <a href="http://developer.apple.com/library/ios/#featuredarticles/ViewControllerPGforiPhoneOS/ViewLoadingandUnloading/ViewLoadingandUnloading.html">Apple&#39;s View Controller Programmer Guide for iOS</a> illustrates a view controller&#39;s loading and unloading sequence: </p>
+<p>The test will always fail, telling you that <code>vc.myLabel</code> is nil. There is a very good reason for that. <a href="http://developer.apple.com/library/ios/#featuredarticles/ViewControllerPGforiPhoneOS/ViewLoadingandUnloading/ViewLoadingandUnloading.html">Apple&#39;s View Controller Programmer Guide for iOS</a> illustrates a view controller&#39;s loading and unloading sequence with the following diagram: </p>
 
 <p><img class="align-center" title="Instantiating View Hierarchy" src="http://developer.apple.com/library/ios/featuredarticles/ViewControllerPGforiPhoneOS/Art/loading_a_view_into_memory_2x.png" width="355" height="302" /></p>
 
@@ -42,14 +42,14 @@
 <p>Whenever some part of your app asks the view controller for its view object and that object is not currently in memory, the view controller loads the view hierarchy into memory and stores it in its view property for future reference.</p>
 </blockquote>
 
-<p>This explains why <code>myLabel</code> is always nil in the test case above; it has not yet been loaded, since I haven&#39;t accessed the view property yet. Let&#39;s add some code to verify it:</p>
+<p>This explains why <code>myLabel</code> is always nil in the test case above; it has not yet been loaded, since - at the time <code>STAssertNotNil</code> is reached - the view property has not yet been accessed. To force loading of the view hierarchy, invoke the <code>view</code> property of the viewcontroller:</p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithNibName:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
-<span class="p">[</span><span class="n">vc</span> <span class="n">view</span><span class="p">];</span> <span class="c1">// load view hierarchy</span>
+<div class="highlight"><pre><code class="objc"><span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">MyViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">initWithNibName</span><span class="o">:</span><span class="s">@&quot;MyViewController&quot;</span> <span class="n">bundle</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+<span class="p">[</span><span class="n">vc</span> <span class="n">view</span><span class="p">];</span> <span class="c1">// load view hierarchy (if not already loaded)</span>
 <span class="n">STAssertNotNil</span><span class="p">(</span><span class="n">vc</span><span class="p">.</span><span class="n">myLabel</span><span class="p">,</span> <span class="s">@&quot;Should connect myLabel IBOutlet.&quot;</span><span class="p">);</span>
 </code></pre></div>
 
-<p>Now, as opposed to before, the test passes. And it makes sense, because - when asking for the view - I access the view property of MyViewController which will load the view hierarchy into memory if not already loaded.</p>
+<p>Now, as opposed to before, the test passes, because <em>the view controller loads the view hierarchy into memory and stores it in its view property</em> </p>
 
 <h3>When using Storyboards</h3>
 
@@ -57,20 +57,20 @@
 
 <ul>
 <li>Assign an identifier string to the viewcontroller in the storyboard.</li>
-<li>Load the storyboard programmatically and ask it for a viewcontroller with a certain identifier.</li>
+<li>Load the storyboard programmatically and ask it for a viewcontroller with a desired identifier.</li>
 </ul>
 
-<p>Assume a storboard with <code>MyViewController</code> in it. First, in the Storyboard, select <code>MyViewController</code> and, in Utilities View, select the Identity Inspector. In here you will find an Identity Setting named <code>Storyboard ID</code>. This is used to identify the viewcontroller. Assign a unique value, eg <code>MyViewController</code>.</p>
+<p>Assume a storboard containing the view of <code>MyViewController</code>. First, in the Storyboard, select <code>MyViewController</code> and, in Utilities View, select the Identity Inspector. In here you will find an Identity Setting named <code>Storyboard ID</code>. This is used to identify the viewcontroller. Assign a unique, descriptive value, eg <code>MyViewController</code>.</p>
 
 <p><img src="/images/storyboard-identifier.png" alt="Storyboard viewcontroller identifier"></p>
 
-<p>Now, when initializing <code>MyViewController</code> from test code, use the following two lines of code:</p>
+<p>Now, when initializing <code>MyViewController</code> from test code, follow this pattern to load it programmatically (where <em>Storyboard</em> is the name of the containing storyboard file):</p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">UIStoryboard</span> <span class="o">*</span><span class="n">storyboard</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIStoryboard</span> <span class="nl">storyboardWithName:</span><span class="s">@&quot;Storyboard&quot;</span> <span class="nl">bundle:</span><span class="nb">nil</span><span class="p">];</span>
-<span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[</span><span class="n">storyboard</span> <span class="nl">instantiateViewControllerWithIdentifier:</span><span class="s">@&quot;MyViewController&quot;</span><span class="p">];</span>
+<div class="highlight"><pre><code class="objc"><span class="n">UIStoryboard</span> <span class="o">*</span><span class="n">storyboard</span> <span class="o">=</span> <span class="p">[</span><span class="n">UIStoryboard</span> <span class="n">storyboardWithName</span><span class="o">:</span><span class="s">@&quot;Storyboard&quot;</span> <span class="n">bundle</span><span class="o">:</span><span class="nb">nil</span><span class="p">];</span>
+<span class="n">MyViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[</span><span class="n">storyboard</span> <span class="n">instantiateViewControllerWithIdentifier</span><span class="o">:</span><span class="s">@&quot;MyViewController&quot;</span><span class="p">];</span>
 </code></pre></div>
 
-<p>With this approach we don&#39;t even have to invoke the view property, since the view hierarchy has already been loaded at this time.</p>
+<p>With this approach you don&#39;t have to invoke the view property, since the view hierarchy has already been loaded into memory at this time.</p>
 
 
     

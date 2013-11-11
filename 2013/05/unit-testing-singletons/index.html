@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-78b1f73dd413e65f57eeac2628cd630d.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -24,16 +24,16 @@
   <div id="post">
   	<h2>Unit Testing Singletons</h2>
     <time class="date">May 22, 2013</time>
-    <p>Whether to use singletons or not is a question of religion and I won&#39;t be judging anyone. In my opinion there are certain situations where singletons just make our lives easier, hence I introduce a singleton every now and then, when appropriate. However, testing singletons is no easy task, which is why I tend to avoid it.</p>
+    <p>Whether to use singletons or not is a matter of religion and I won&#39;t be judging anyone. In my opinion there are certain situations where singletons just make our lives easier, hence I introduce a singleton every now and then, when appropriate. However, testing singletons is no easy task, which is why I tend to avoid it.</p>
 
-<p>In an attempt to make things easier, I created <a href="https://github.com/kaspermunck/KMSwizzleton">KMSwizzleton</a>, a helper class that makes the following possible:</p>
+<p>In an attempt to make things easier, I created <a href="https://github.com/kaspermunck/KMSwizzleton">KMSwizzleton</a>, a helper class that aims to inject mock instances into a singleton object (assuming that you follow the <code>sharedInstance</code>).</p>
 
-<div class="highlight"><pre><code class="objc"><span class="kt">id</span> <span class="n">fakeSingleton</span> <span class="o">=</span> <span class="p">[</span><span class="n">OCMockObject</span> <span class="nl">mockForClass:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]];</span> <span class="c1">// or any other mock library</span>
-<span class="p">[</span><span class="n">KMSwizzleton</span> <span class="nl">stubSingleton:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]</span> <span class="nl">andReturnFakeInstance:</span><span class="n">fakeSingleton</span><span class="p">];</span>
+<div class="highlight"><pre><code class="objc"><span class="kt">id</span> <span class="n">fakeSingleton</span> <span class="o">=</span> <span class="p">[</span><span class="n">OCMockObject</span> <span class="n">mockForClass</span><span class="o">:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]];</span> <span class="c1">// or any other mock library</span>
+<span class="p">[</span><span class="n">KMSwizzleton</span> <span class="n">stubSingleton</span><span class="o">:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]</span> <span class="n">andReturnFakeInstance</span><span class="o">:</span><span class="n">fakeSingleton</span><span class="p">];</span>
 <span class="kt">id</span> <span class="n">instance</span> <span class="o">=</span> <span class="p">[</span><span class="n">MySingleton</span> <span class="n">sharedInstance</span><span class="p">];</span> <span class="c1">// returns fakeSingleton</span>
 </code></pre></div>
 
-<p>This makes it possible to inject a stub or mock singleton into a closed method, which otherwise would quite a hassle. It also gets rid of the need to expose a property injection method or to override <code>+sharedInstance</code> in a testable subclass of <code>MySingleton</code>. After <code>+sharedInstance</code> is called once, <code>MySingleton</code> is reverted to its original state.</p>
+<p>This makes it possible to inject a stub or mock singleton into a closed method, which otherwise would be quite a hassle. It also gets rid of the need to expose a property injection method, dealing with a private class extension or to override <code>+sharedInstance</code> in a testable subclass of <code>MySingleton</code>. After <code>+sharedInstance</code> is called once, <code>MySingleton</code> is reverted to its original state.</p>
 
 
     
@@ -44,9 +44,9 @@
     
     	singleton
     
-    	sharedInstance
+    	sharedinstance
     
-    	KMSwizzleton
+    	kmswizzleton
     
     </span>]
 

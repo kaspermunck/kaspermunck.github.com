@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-78b1f73dd413e65f57eeac2628cd630d.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -26,31 +26,49 @@
     <time class="date">November 02, 2012</time>
     <h3>Categories, Properties and Ivars</h3>
 
-<p>Today I had to add an extra property to a category on an <code>NSManagedObject</code>. The property is a bool used to determine the state of the <code>UITableViewCell</code> that is supposed to show info from the MO, so it does not need to be stored anywhere. Because of that fact I decided that a category would be the perfect solution. But adding a property to a categor y gives the following error:</p>
-<div class="highlight"><pre><code class="text">@synthesize not allowed in a category&#39;s implementation.
+<p>Sometimes, subclassing causes unneccessary overhead (or is even discouraged by Apple, such as in the case of <code>NSArray</code> or <code>NSDictionary</code>). Especially if you need no more than a few extra properties. A category appears as a simpler solution, however, adding properties to a category is prohibited. Doing so causes one of the following errors, depending on which version of Xcode you are using:</p>
+
+<p><strong>No auto synthesis (before Xcode 4.4)</strong></p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">@synthesize not allowed in a category&#39;s implementation.
 </code></pre></div>
-<p>Adding an ivar to a category and implement setter/getter manually is a no-go as well. An attempt will also result in an error:</p>
-<div class="highlight"><pre><code class="text">Ivars may not be placed in categories.  
+<p><strong>Auto synthesis</strong></p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">Property &#39;myProperty&#39; requires method &#39;myProperty/setMyProperty&#39; to be defined [...] 
 </code></pre></div>
-<p>At this point the question was: Is it even possible to append a class with a property using a category? Yes! The objective-c runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>[…] simulate the addition of object instance variables to an existing class</em>. Long story short, I found <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">this blog post</a> which explains what to do and the final code looks like this:</p></p>
+<p>Manually implementing a getter for the property could be the solution. Consider an <code>NSManagedObject</code> subclass with <code>NSString</code> properties for given an family name, respectively. It is not unline that you would provide a property for getting the full name:</p>
+
+<div class="highlight"><pre><code class="objc"><span class="c1">// in the interface file</span>
+<span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">fullName</span><span class="p">;</span>
+
+<span class="c1">// in the implementation file</span>
+<span class="k">-</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">fullName</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithFormat</span><span class="o">:</span><span class="s">@&quot;%@ %@&quot;</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">givenName</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">familyName</span><span class="p">)];</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>But, creating a setter is not as simple as creating a getter. An ivar for storing the value is required, and adding an ivar to a category will also result in an error:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">Instance variables may not be placed in categories.  
+</code></pre></div>
+<p>This is due to the fact that it is impossible to guarantee a unique ivar. This could potentially lead to a situation where setting a new value for property A causes the value of property B to change too, because of clashing ivars.</p>
+
+<p>Luckily, the Objective-C runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>[…] simulate the addition of object instance variables to an existing class</em>. <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">This blog post at Techpaa</a> explains associated objects in details. In short, you will have to provide an object to associate the &quot;ivar&quot; with, a unique key by which it is identified, and a socalled association policy. This policy must obey the characteristics of the property you add (that is, atomicity, memory management etc.):</p>
 
 <p><strong>MyManagedObject+Additions.h</strong></p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">@property</span> <span class="p">(</span><span class="n">getter</span><span class="o">=</span><span class="n">isRedefinition</span><span class="p">)</span> <span class="kt">BOOL</span> <span class="n">redefined</span><span class="p">;</span>
+<div class="highlight"><pre><code class="objc"><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">test</span><span class="p">;</span>
 </code></pre></div>
 
 <p><strong>MyManagedObject+Additions.m</strong></p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">NSString</span> <span class="k">const</span> <span class="o">*</span><span class="n">redefined_key</span> <span class="o">=</span> <span class="s">@&quot;my.very.unique.key&quot;</span><span class="p">;</span>
+<div class="highlight"><pre><code class="objc"><span class="n">NSString</span> <span class="k">const</span> <span class="o">*</span><span class="n">key</span> <span class="o">=</span> <span class="s">@&quot;my.very.unique.key&quot;</span><span class="p">;</span>
 
-<span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setRedefined:</span><span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nv">redefined</span>
+<span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setTest:</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">test</span>
 <span class="p">{</span>
-    <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">redefined_key</span><span class="p">,</span> <span class="p">[</span><span class="n">NSNumber</span> <span class="nl">numberWithBool:</span><span class="n">redefined</span><span class="p">],</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+    <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="k">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">isRedefinition</span>
+<span class="k">-</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">test</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">redefined_key</span><span class="p">)</span> <span class="n">boolValue</span><span class="p">];</span>
+    <span class="k">return</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
 
@@ -58,11 +76,11 @@
 
 <h4>12/03/2012</h4>
 
-<p>Another great article about associated objects / references is now available at the <a href="http://blog.carbonfive.com/2012/11/27/monkey-patching-ios-with-objective-c-categories-part-ii-adding-instance-properties/">Carbon Emitter blog</a>.</p>
+<p>A great article about associated objects / references is now available at the <a href="http://blog.carbonfive.com/2012/11/27/monkey-patching-ios-with-objective-c-categories-part-ii-adding-instance-properties/">Carbon Emitter blog</a>.</p>
 
 <h4>11/12/2012</h4>
 
-<p>The article <a href="http://www.merowing.info/2012/02/associated-objects-for-more-advanced-categories/">Advanced categories with associated objects</a> by Krysztof Zablocki digs a little deeper with categories and associated objects. It&#39;s absolutely worth a read.</p>
+<p>The article <a href="http://www.merowing.info/2012/02/associated-objects-for-more-advanced-categories/">Advanced categories with associated objects</a> by Krysztof Zablocki digs a little deeper with categories and associated objects. Absolutely worth a read.</p>
 
 
     
