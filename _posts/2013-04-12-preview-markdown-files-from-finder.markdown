@@ -8,7 +8,7 @@ categories:
 - finder
 ---
 
-As a mac user I use Preview (hover a file, hit space) all the time when browsing code and text files in Finder, but Preview doesn't know how to display a preview of a `.md` or `.markdown` file. But then I found an interesting thing: [QLMarkdown](https://github.com/toland/qlmarkdown/). 
+As a mac user I use Preview (hover a file, hit space) all the time when browsing code and text files in Finder. However, Preview doesn't know how to handle a markdown (`.md` or `.markdown`) file. During an attempt to find a solution, an intense session of power Googling lead me to discover an interesting script: [QLMarkdown](https://github.com/toland/qlmarkdown/). 
 
 > QLMarkdown is is a simple QuickLook generator for Markdown files.
 
