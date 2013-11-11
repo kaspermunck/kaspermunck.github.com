@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="{{ site.author.name }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ page.title }}</title>
+
+    <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
+
+    {% css_asset_tag global %}
+      - /_assets/css/bootstrap.min.css
+      - /_assets/css/site.css
+      - /_assets/css/pygments.css
+    {% endcss_asset_tag %}
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">{{ site.title }}</a></h1>
+    </div>
+
+    <div class="row">
+      {{ content }}
+    </div>
+
+    <div class="row">
+      {% include footer.html %}
+    </div>
+  </div>
+
+  {% include analytics.html %}
+  </body>
+</html>
