@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-d1f9b5205301d4c8fa88923c7da9d33e.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -29,10 +29,10 @@
 <p>Sometimes, subclassing causes unneccessary overhead (or is even discouraged by Apple, such as in the case of <code>NSArray</code> or <code>NSDictionary</code>). Especially if you need no more than a few extra properties. A category appears as a simpler solution, however, adding properties to a category is prohibited. Doing so causes one of the following errors, depending on which version of Xcode you are using:</p>
 
 <p><strong>No auto synthesis (before Xcode 4.4)</strong></p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">@synthesize not allowed in a category&#39;s implementation.
+<div class="highlight"><pre><code class="text">@synthesize not allowed in a category&#39;s implementation.
 </code></pre></div>
 <p><strong>Auto synthesis</strong></p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">Property &#39;myProperty&#39; requires method &#39;myProperty/setMyProperty&#39; to be defined [...] 
+<div class="highlight"><pre><code class="text">Property &#39;myProperty&#39; requires method &#39;myProperty/setMyProperty&#39; to be defined [...] 
 </code></pre></div>
 <p>Manually implementing a getter for the property could be the solution. Consider an <code>NSManagedObject</code> subclass with <code>NSString</code> properties for given an family name, respectively. It is not unline that you would provide a property for getting the full name:</p>
 
@@ -41,12 +41,12 @@
 
 <span class="c1">// in the implementation file</span>
 <span class="k">-</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">fullName</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithFormat</span><span class="o">:</span><span class="s">@&quot;%@ %@&quot;</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">givenName</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">familyName</span><span class="p">)];</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">NSString</span> <span class="nl">stringWithFormat:</span><span class="s">@&quot;%@ %@&quot;</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">givenName</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">familyName</span><span class="p">)];</span>
 <span class="p">}</span>
 </code></pre></div>
 
 <p>But, creating a setter is not as simple as creating a getter. An ivar for storing the value is required, and adding an ivar to a category will also result in an error:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">Instance variables may not be placed in categories.  
+<div class="highlight"><pre><code class="text">Instance variables may not be placed in categories.  
 </code></pre></div>
 <p>This is due to the fact that it is impossible to guarantee a unique ivar. This could potentially lead to a situation where setting a new value for property A causes the value of property B to change too, because of clashing ivars.</p>
 

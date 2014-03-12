@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-d1f9b5205301d4c8fa88923c7da9d33e.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -28,8 +28,8 @@
 
 <p>In an attempt to make things easier, I created <a href="https://github.com/kaspermunck/KMSwizzleton">KMSwizzleton</a>, a helper class that aims to inject mock instances into a singleton object (assuming that you follow the <code>sharedInstance</code>).</p>
 
-<div class="highlight"><pre><code class="objc"><span class="kt">id</span> <span class="n">fakeSingleton</span> <span class="o">=</span> <span class="p">[</span><span class="n">OCMockObject</span> <span class="n">mockForClass</span><span class="o">:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]];</span> <span class="c1">// or any other mock library</span>
-<span class="p">[</span><span class="n">KMSwizzleton</span> <span class="n">stubSingleton</span><span class="o">:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]</span> <span class="n">andReturnFakeInstance</span><span class="o">:</span><span class="n">fakeSingleton</span><span class="p">];</span>
+<div class="highlight"><pre><code class="objc"><span class="kt">id</span> <span class="n">fakeSingleton</span> <span class="o">=</span> <span class="p">[</span><span class="n">OCMockObject</span> <span class="nl">mockForClass:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]];</span> <span class="c1">// or any other mock library</span>
+<span class="p">[</span><span class="n">KMSwizzleton</span> <span class="nl">stubSingleton:</span><span class="p">[</span><span class="n">MySingleton</span> <span class="n">class</span><span class="p">]</span> <span class="nl">andReturnFakeInstance:</span><span class="n">fakeSingleton</span><span class="p">];</span>
 <span class="kt">id</span> <span class="n">instance</span> <span class="o">=</span> <span class="p">[</span><span class="n">MySingleton</span> <span class="n">sharedInstance</span><span class="p">];</span> <span class="c1">// returns fakeSingleton</span>
 </code></pre></div>
 
@@ -44,9 +44,9 @@
     
     	singleton
     
-    	sharedinstance
+    	sharedInstance
     
-    	kmswizzleton
+    	KMSwizzleton
     
     </span>]
 

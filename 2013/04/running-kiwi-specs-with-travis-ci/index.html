@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-d1f9b5205301d4c8fa88923c7da9d33e.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -43,13 +43,13 @@
 <p>Close the project and navigate to the project folder. Create a file named Podfile and copy the contents of <a href="https://github.com/kaspermunck/boiler-plates/blob/master/Kiwi/Podfile">this file</a> into it. Then run <code>pod install</code> from the command line add a dependency on Kiwi. Open MyApp.xcworkspace (workspace, not project) and hit <code>cmd+b</code> to verify that the project builds and <code>cmd+u</code> to verify that the tests also run.</p>
 
 <p>If you get an error similar to this:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">clang: error: no such file or directory: &#39;/Users/. . .prefix.pch.dia&#39;
+<div class="highlight"><pre><code class="text">clang: error: no such file or directory: &#39;/Users/. . .prefix.pch.dia&#39;
 </code></pre></div>
-<p>when trying to run your tests, navigate to the <em>Pods</em> target and in <em>Pods-MyAppTests.xcconfig</em> in <em>Target Support Files -&gt; Pods-MyAppTests</em>, change the line that reads:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot; &quot;$(inherited)&quot;
+<p>when trying to run your tests, navigate to the <em>Pods</em> target and in <em>Pods-MyAppTests.xcconfig</em> in <em>Target Support Files -> Pods-MyAppTests</em>, change the line that reads:</p>
+<div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot; &quot;$(inherited)&quot;
 </code></pre></div>
 <p>to</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot;
+<div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot;
 </code></pre></div>
 <p>This is a <a href="https://github.com/CocoaPods/CocoaPods/issues/956">known issue</a>, which is to be addressed sooner or later. Hit <code>cmd+u</code> again and everything should be working fine. </p>
 
@@ -59,7 +59,7 @@
 
 <span class="c1">// logic test</span>
 <span class="n">it</span><span class="p">(</span><span class="s">@&quot;should always succeed&quot;</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
-    <span class="p">[[</span><span class="n">theValue</span><span class="p">(</span><span class="nb">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="n">equal</span><span class="o">:</span><span class="n">theValue</span><span class="p">(</span><span class="nb">YES</span><span class="p">)];</span>
+    <span class="p">[[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)];</span>
 <span class="p">});</span>
 
 <span class="n">SPEC_END</span>
@@ -89,19 +89,19 @@
 </code></pre></div>
 
 <p>The parameters are self explanatory. The output will be massive, but you only need to verify that, somewhere near the bottom, it reads:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">** BUILD SUCCEEDED **
+<div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
 </code></pre></div>
 <p>In the spirit of <a href="http://en.wikipedia.org/wiki/Test-driven_development">TDD</a>,  break the test case and verify that it fails:</p>
 
-<div class="highlight"><pre><code class="objc"><span class="p">[</span><span class="n">theValue</span><span class="p">(</span><span class="nb">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="n">equal</span><span class="o">:</span><span class="n">theValue</span><span class="p">(</span><span class="nb">NO</span><span class="p">)];</span>
+<div class="highlight"><pre><code class="objc"><span class="p">[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">NO</span><span class="p">)];</span>
 </code></pre></div>
 
 <p>Hit <code>cmd+u</code> (in Xcode) to verify that it breaks. Now, re-run the <code>xcodebuild</code> command again. The output is (suprisingly) still: </p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">** BUILD SUCCEEDED **
+<div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
 </code></pre></div>
 <p>This is unexpected, but an explanation follows. What happens when tests are ran is that a script named RunPlatformUnitTests, located in <code>/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools/</code> is executed. In RunPlatformUnitTests&#39;s main function it reads:</p>
 
-<div class="highlight"><pre><code class="sh"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;${TEST_HOST}&quot;</span> !<span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+<div class="highlight"><pre><code class="sh"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;${TEST_HOST}&quot;</span> !<span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then</span>
     <span class="c"># All applications are tested the same way, by injecting a bundle.</span>
     <span class="c"># The bundle needs to configure and run the tests itself somehow.</span>
 
@@ -121,7 +121,7 @@ Warning <span class="k">${</span><span class="nv">LINENO</span><span class="k">}
 </code></pre></div>
 
 <p>It clearly states that Application Unit Tests (read below) are not supported by the Simulator. This can be ommited, however, by adding <code>TEST_HOST=&#39;&#39;</code> to the end of the <code>xcodebuild</code> command. Run the tests from the terminal again. The output should now read something similar to:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">Executed 1 test, with 1 failure (1 unexpected) in 0.022 (0.023) seconds
+<div class="highlight"><pre><code class="text">Executed 1 test, with 1 failure (1 unexpected) in 0.022 (0.023) seconds
 </code></pre></div>
 <p>So far, so good. Now create a ViewController with a nib file (don&#39;t forget to add it to the test target). Add a <code>UIButton</code> to the view and connect it to an IBOutlet named <code>button</code>. Then, in the test file, add a new spec:</p>
 
@@ -134,7 +134,7 @@ Warning <span class="k">${</span><span class="nv">LINENO</span><span class="k">}
 </code></pre></div>
 
 <p>Fix the other spec (revert <code>NO</code> to <code>YES</code>) and hit <code>cmd+u</code>. The tests pass. Now run the tests from the terminal again.</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">/Applications/Xcode.app/Contents/Developer/Tools/RunPlatformUnitTests.include:448: error: Failed tests for architecture &#39;i386&#39; (GC OFF)
+<div class="highlight"><pre><code class="text">/Applications/Xcode.app/Contents/Developer/Tools/RunPlatformUnitTests.include:448: error: Failed tests for architecture &#39;i386&#39; (GC OFF)
 
 ** BUILD FAILED **
 </code></pre></div>
@@ -176,7 +176,7 @@ Warning <span class="k">${</span><span class="nv">LINENO</span><span class="k">}
 <p>Basically, you sign up with your Github account and select which repos you want it to monitor. On every push, Travis will build and notify you if anything went wrong. Best of all: <a href="http://about.travis-ci.org/docs/user/build-configuration/">It is highly customizable</a> and it does a lot of things for you automatically (for example runs <code>pod install</code> prior to all builds if a Podfile exists).</p>
 
 <p>Since the project depends on WaxSim to run its tests in the Simulator (XcodeTest is integrated in the project so that&#39;s no problem), Travis must be configured to install the dependency before attempting to build the project. For that purpose, use <a href="https://gist.github.com/kaspermunck/5374751">this shell script</a> and put it in the root of your project folder. Make sure it&#39;s executable (<code>chmod +x</code>) Now, also in the root, create a file named <code>.travis.yml</code>. This is where you can <a href="http://about.travis-ci.org/docs/user/build-configuration/">inject code and run custom scripts</a> before and after Travis builds your project. Paste in the following:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text"># tell travis that this is an objective-c project
+<div class="highlight"><pre><code class="text"># tell travis that this is an objective-c project
 language: objective-c
 
 # install xcodetest dependencies
@@ -187,8 +187,8 @@ script: ./build_and_run_unit_tests.sh MyApp MyAppTests
 </code></pre></div>
 <p>Travis uses a <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">default build script</a>, which is not sufficient enough for this purpose.</p>
 
-<p>Finally, commit and push everything to a Github repo that is monitored by Travis and go to the build page (<a href="http://travis-ci.org">tracis-ci.org</a> -&gt; My Repositories) tap your project, wait for it to build, scroll down to the bottom and verify that it reads:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">=================
+<p>Finally, commit and push everything to a Github repo that is monitored by Travis and go to the build page (<a href="http://travis-ci.org">tracis-ci.org</a> -> My Repositories) tap your project, wait for it to build, scroll down to the bottom and verify that it reads:</p>
+<div class="highlight"><pre><code class="text">=================
 Unit Tests Passed
 =================
 </code></pre></div>

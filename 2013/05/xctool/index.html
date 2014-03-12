@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="/fontawesome/font-awesome.min.css" />
 
-    <link href='/assets/global-ece4c74c74b7b7b6e0158e435438803f.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-d1f9b5205301d4c8fa88923c7da9d33e.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -61,10 +61,10 @@
 <h3>Disable Unit Test Runner</h3>
 
 <p>The unit test target Xcode creates when checking Include Unit Tests runs a build script named <code>RunUnitTests</code>. When inspecting the output from xctool, you will notice this message:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">/Applications/Xcode.app/Contents/Developer/Tools/RunUnitTests:68: note: RunUnitTests exited without running tests because TEST_AFTER_BUILD was set to NO.
+<div class="highlight"><pre><code class="text">/Applications/Xcode.app/Contents/Developer/Tools/RunUnitTests:68: note: RunUnitTests exited without running tests because TEST_AFTER_BUILD was set to NO.
 </code></pre></div>
-<p>Although this does no harm at all, warnings should never be present. Click on MyApp project in Project Navigator and select MyAppTests target. Under <code>Build Phases -&gt; Run Script</code> it says:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text"># Run the unit tests in this test bundle.
+<p>Although this does no harm at all, warnings should never be present. Click on MyApp project in Project Navigator and select MyAppTests target. Under <code>Build Phases -> Run Script</code> it says:</p>
+<div class="highlight"><pre><code class="text"># Run the unit tests in this test bundle.
 &quot;${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests&quot;
 </code></pre></div>
 <p>Since building of the project is now relying 100% on xctool, it is safe to remove this build script. Run the tests again and the message is no longer showing.</p>
@@ -77,12 +77,12 @@
 </code></p>
 
 <p>The first was a code signing error:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">Code Sign error: A valid provisioning profile matching the application&#39;s Identifier &#39;dk.muncken.MyApp&#39; could not be found
+<div class="highlight"><pre><code class="text">Code Sign error: A valid provisioning profile matching the application&#39;s Identifier &#39;dk.muncken.MyApp&#39; could not be found
 </code></pre></div>
 <p>You get rid of this either by signing the project properly or specifying the SDK to be the iphonesimulator (add <code>-sdk iphonesimulator</code>) and thereby omit code signing.</p>
 
 <p>The second was an architecture error:</p>
-<div class="highlight"><pre><code class="text language-text" data-lang="text">No architectures to compile for (ONLY_ACTIVE_ARCH=YES, active arch=x86_64, VALID_ARCHS=armv7 armv7s).
+<div class="highlight"><pre><code class="text">No architectures to compile for (ONLY_ACTIVE_ARCH=YES, active arch=x86_64, VALID_ARCHS=armv7 armv7s).
 </code></pre></div>
 <p>To get rid of this one, go to project settings and then under Architectures, change <a href="http://useyourloaf.com/blog/2010/04/21/xcode-build-active-architecture-only.html">Build Active Architecture Only</a> to <code>NO</code>.</p>
 
