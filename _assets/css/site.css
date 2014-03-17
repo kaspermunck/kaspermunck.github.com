@@ -68,6 +68,10 @@ a {
 	color: #4c4c4c;
 }
 
+#footer .stackoverflow:hover {
+	color: #ffa500;
+}
+
 #footer .social a {
 	color: #d1d1d1;
 }
