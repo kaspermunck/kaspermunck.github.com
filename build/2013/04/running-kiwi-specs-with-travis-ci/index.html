@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="Kasper Munck">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Running iOS Application Unit Tests with Travis-CI</title>
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='/assets/global-ab408f37102cbf85988b28a2e5cfc3cd.css' rel='stylesheet' type='text/css' />
+
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">Kasper Munck</a></h1>
+    </div>
+
+    <div class="row">
+      <div class="content">
+  <div id="post">
+  	<h2>Running iOS Application Unit Tests with Travis-CI</h2>
+    <time class="date">April 12, 2013</time>
+    <h3>Update 5/2-2013: <a href="https://github.com/facebook/xctool">xctool</a></h3>
+
+<p>Facebook has released <code>xctool</code>, which is <em>a replacement for Apple&#39;s xcodebuild that makes it easier to build and test iOS and Mac products</em>. It solves the problem with running application unit tests from the command line and in addition to that, it&#39;s a simpler and improved interface to <code>xcodebuild</code>. You should use <code>xctool</code> instead of <code>xcodebuild</code>. However, if you experience difficulties with Kiwi and Travis-CI, then read on.</p>
+
+<hr>
+
+<p><a href="http://travis-ci.org">Travis</a> has just <a href="http://about.travis-ci.org/blog/introducing-mac-ios-rubymotion-testing/">announced support for Objective-C projects</a>. Unfortunately, Travis supports only logic unit tests (more on that later) out of the box. However, with a few extra steps (thanks to Travis for being extremely customizable), support for application unit tests becomes a reality as well. WIth a little help from some <a href="https://github.com/sgleadow/xcodetest">delightful</a> <a href="https://github.com/jonathanpenn/WaxSim">tools</a> I managed to make it work. </p>
+
+<p>My preferred testing framework is <a href="https://github.com/allending/Kiwi">Kiwi</a>, but this approach should do for any other testing testing frameworks for iOS.</p>
+
+<h3>Installing Kiwi</h3>
+
+<p>I use <a href="http://cocoapods.org">CocoaPods</a> to manage dependencies, thus this article will assume that you have CocoaPods installed. First, create a new project and make sure to include unit tests.</p>
+
+<p><img src="/images/create-new-project.png" alt="Create Project"></p>
+
+<p>Close the project and navigate to the project folder. Create a file named Podfile and copy the contents of <a href="https://github.com/kaspermunck/boiler-plates/blob/master/Kiwi/Podfile">this file</a> into it. Then run <code>pod install</code> from the command line add a dependency on Kiwi. Open MyApp.xcworkspace (workspace, not project) and hit <code>cmd+b</code> to verify that the project builds and <code>cmd+u</code> to verify that the tests also run.</p>
+
+<p>If you get an error similar to this:</p>
+<div class="highlight"><pre><code class="text">clang: error: no such file or directory: &#39;/Users/. . .prefix.pch.dia&#39;
+</code></pre></div>
+<p>when trying to run your tests, navigate to the <em>Pods</em> target and in <em>Pods-MyAppTests.xcconfig</em> in <em>Target Support Files -> Pods-MyAppTests</em>, change the line that reads:</p>
+<div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot; &quot;$(inherited)&quot;
+</code></pre></div>
+<p>to</p>
+<div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot;
+</code></pre></div>
+<p>This is a <a href="https://github.com/CocoaPods/CocoaPods/issues/956">known issue</a>, which is to be addressed sooner or later. Hit <code>cmd+u</code> again and everything should be working fine. </p>
+
+<p>Now delete <code>MyAppTests.h</code> and replace the contents of <code>MyAppTests.m</code> with this Kiwi template:</p>
+
+<div class="highlight"><pre><code class="objc"><span class="n">SPEC_BEGIN</span><span class="p">(</span><span class="n">ViewControllerSpecs</span><span class="p">)</span>
+
+<span class="c1">// logic test</span>
+<span class="n">it</span><span class="p">(</span><span class="s">@&quot;should always succeed&quot;</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+    <span class="p">[[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)];</span>
+<span class="p">});</span>
+
+<span class="n">SPEC_END</span>
+</code></pre></div>
+
+<p>Run tests with <code>cmd+u</code> and verify that it succeeds.</p>
+
+<h3>Testing From the Terminal</h3>
+
+<p>A build server is going to run the tests so they must be invokable from the command line. A few extra steps are needed here: First, create a unit test scheme and name it appropriately (eg, MyAppTests). Click on <em>MyApp</em> next to the Stop button in the upper left corner and select Manage Schemes.</p>
+
+<p><img src="/images/new-scheme.png" alt="New Scheme"></p>
+
+<p>Make sure that both schemes (MyApp and MyAppTests) are Shared. Otherwise, they will not be exported and cannot be reached by Travis.</p>
+
+<p><img src="/images/shared-schemes.png" alt="Shared Schemes"></p>
+
+<p>Select MyAppTests and click Edit. Under the Build tap check Test and Run for MyAppTests.</p>
+
+<p><img src="/images/build-config.png" alt="Build Configuration"></p>
+
+<p>Switch to the terminal.</p>
+
+<p>Xcode has a command line utility named <a href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/xcodebuild.1.html">xcodebuild</a>, with which you can build Xcode projects from a non-UI environment such as Travis. By passing it <code>TEST_AFTER_BUILD=YES</code> we can run tests from the command line, too. Note that the SDK parameters is set to <em>iphonesimulator</em>; if you don&#39;t do that you might wind up with signing errors. Now, run this from the command line to build and run the project:</p>
+
+<div class="highlight"><pre><code class="sh">xcodebuild -workspace MyApp.xcworkspace -scheme MyAppTests -sdk iphonesimulator -configuration Release <span class="nv">TEST_AFTER_BUILD</span><span class="o">=</span>YES
+</code></pre></div>
+
+<p>The parameters are self explanatory. The output will be massive, but you only need to verify that, somewhere near the bottom, it reads:</p>
+<div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
+</code></pre></div>
+<p>In the spirit of <a href="http://en.wikipedia.org/wiki/Test-driven_development">TDD</a>,  break the test case and verify that it fails:</p>
+
+<div class="highlight"><pre><code class="objc"><span class="p">[</span><span class="n">theValue</span><span class="p">(</span><span class="n">YES</span><span class="p">)</span> <span class="n">should</span><span class="p">]</span> <span class="nl">equal:</span><span class="n">theValue</span><span class="p">(</span><span class="n">NO</span><span class="p">)];</span>
+</code></pre></div>
+
+<p>Hit <code>cmd+u</code> (in Xcode) to verify that it breaks. Now, re-run the <code>xcodebuild</code> command again. The output is (suprisingly) still: </p>
+<div class="highlight"><pre><code class="text">** BUILD SUCCEEDED **
+</code></pre></div>
+<p>This is unexpected, but an explanation follows. What happens when tests are ran is that a script named RunPlatformUnitTests, located in <code>/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Tools/</code> is executed. In RunPlatformUnitTests&#39;s main function it reads:</p>
+
+<div class="highlight"><pre><code class="sh"><span class="k">if</span> <span class="o">[</span> <span class="s2">&quot;${TEST_HOST}&quot;</span> !<span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="o">]</span>; <span class="k">then</span>
+    <span class="c"># All applications are tested the same way, by injecting a bundle.</span>
+    <span class="c"># The bundle needs to configure and run the tests itself somehow.</span>
+
+    RunTestsForApplication <span class="s2">&quot;${TEST_HOST}&quot;</span> <span class="s2">&quot;${TEST_BUNDLE_PATH}&quot;</span>
+<span class="k">else</span>
+    <span class="c"># If no TEST_HOST is specified, assume we&#39;re running the test bundle.</span>
+    
+    RunTestsForBundle <span class="s2">&quot;${TEST_BUNDLE_PATH}&quot;</span>
+<span class="k">fi</span>
+</code></pre></div>
+
+<p>RunTestsForApplication is defined as such:</p>
+
+<div class="highlight"><pre><code class="sh">RunTestsForApplication<span class="o">()</span> <span class="o">{</span>
+Warning <span class="k">${</span><span class="nv">LINENO</span><span class="k">}</span> <span class="s2">&quot;Skipping tests; the iPhoneSimulator platform does not currently support application-hosted tests (TEST_HOST set).&quot;</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>It clearly states that Application Unit Tests (read below) are not supported by the Simulator. This can be ommited, however, by adding <code>TEST_HOST=&#39;&#39;</code> to the end of the <code>xcodebuild</code> command. Run the tests from the terminal again. The output should now read something similar to:</p>
+<div class="highlight"><pre><code class="text">Executed 1 test, with 1 failure (1 unexpected) in 0.022 (0.023) seconds
+</code></pre></div>
+<p>So far, so good. Now create a ViewController with a nib file (don&#39;t forget to add it to the test target). Add a <code>UIButton</code> to the view and connect it to an IBOutlet named <code>button</code>. Then, in the test file, add a new spec:</p>
+
+<div class="highlight"><pre><code class="objc"><span class="c1">// application test</span>
+<span class="n">it</span><span class="p">(</span><span class="s">@&quot;should connect button&quot;</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+    <span class="n">ViewController</span> <span class="o">*</span><span class="n">vc</span> <span class="o">=</span> <span class="p">[[</span><span class="n">ViewController</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">vc</span> <span class="n">view</span><span class="p">];</span> <span class="c1">// load view hierarchy</span>
+    <span class="p">[</span><span class="n">vc</span><span class="p">.</span><span class="n">button</span> <span class="n">shouldNotBeNil</span><span class="p">];</span> <span class="c1">// test IBOutlet connection</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>Fix the other spec (revert <code>NO</code> to <code>YES</code>) and hit <code>cmd+u</code>. The tests pass. Now run the tests from the terminal again.</p>
+<div class="highlight"><pre><code class="text">/Applications/Xcode.app/Contents/Developer/Tools/RunPlatformUnitTests.include:448: error: Failed tests for architecture &#39;i386&#39; (GC OFF)
+
+** BUILD FAILED **
+</code></pre></div>
+<h3>Application vs Logic Unit Tests</h3>
+
+<p>Even though we managed to fool the build script by adding <code>TEST_HOST=&#39;&#39;</code> it didn&#39;t help us much, since, as it says, all applications are tested by injecting a bundle. <a href="https://developer.apple.com/library/mac/#documentation/DeveloperTools/Conceptual/UnitTesting/01-Unit-Test_Overview/overview.html#//apple_ref/doc/uid/TP40002143-CH2-SW1">According to the docs</a> Xcode differentiates between between application- and logic unit tests, the first being tests that need to run inside a UIKit environment, the latter tests that don&#39;t. There&#39;s more on that <a href="http://www.stewgleadow.com/blog/2012/02/09/running-ocunit-and-kiwi-tests-on-the-command-line/">here</a>. </p>
+
+<p>To get any further from here we&#39;ll use <a href="https://github.com/sgleadow/xcodetest">XcodeTest</a> by <a href="http://www.stewgleadow.com">Stewart Gleadow</a> to actually start the simulator from the terminal and run our tests within that. This is possible because of Travis virtual infrastructure (it wouldn&#39;t be in a complete non-GUI environment).</p>
+
+<h3>XcodeTest</h3>
+
+<blockquote>
+<p>A way of running your application unit tests from the command line.</p>
+</blockquote>
+
+<p>XcodeTest depends on <a href="https://github.com/jonathanpenn/WaxSim">WaxSim</a> which is <em>A wrapper around iPhoneSimulatorRemoteClient, to install and run apps in the iOS simulator.</em> Install WaxSim by first cloning the repository:</p>
+
+<div class="highlight"><pre><code class="sh">git clone https://github.com/jonathanpenn/WaxSim.git
+</code></pre></div>
+
+<p>Then, navigate to the newly cloned working copy of WaXsim with <code>cd WaxSim</code> and run:</p>
+
+<div class="highlight"><pre><code class="sh">sudo xcodebuild install <span class="nv">DSTROOT</span><span class="o">=</span>/ <span class="nv">INSTALL_PATH</span><span class="o">=</span>/usr/local/bin
+</code></pre></div>
+
+<p>Now, follow the installation guide in XcodeTest&#39;s README. Beware,  <code>build_and_run_unit_tests.sh</code> <a href="https://gist.github.com/kaspermunck/5375284">might need to be tweeked</a> in order to make it work with Kiwi, since Kiwi was added as a dependency using CocoaPods and the project therefore is based on a workspace. </p>
+
+<p>Now run the tests again with XcodeTest:</p>
+
+<div class="highlight"><pre><code class="sh">./build_and_run_unit_tests.sh MyApp MyAppTests
+</code></pre></div>
+
+<p>You should see it build, open the simulator and run the tests (both application and logic) without any problems. For the sake of verification, break and fix your tests a few times to see that it works properly.</p>
+
+<h3>Travis-CI</h3>
+
+<p>Now that both application- and logic unit tests are running from the command line, the next step the Travis configuration. <a href="http://travis-ci.org">Travis-CI</a> is free, hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuos integration</a> for open source projects.</p>
+
+<p>Basically, you sign up with your Github account and select which repos you want it to monitor. On every push, Travis will build and notify you if anything went wrong. Best of all: <a href="http://about.travis-ci.org/docs/user/build-configuration/">It is highly customizable</a> and it does a lot of things for you automatically (for example runs <code>pod install</code> prior to all builds if a Podfile exists).</p>
+
+<p>Since the project depends on WaxSim to run its tests in the Simulator (XcodeTest is integrated in the project so that&#39;s no problem), Travis must be configured to install the dependency before attempting to build the project. For that purpose, use <a href="https://gist.github.com/kaspermunck/5374751">this shell script</a> and put it in the root of your project folder. Make sure it&#39;s executable (<code>chmod +x</code>) Now, also in the root, create a file named <code>.travis.yml</code>. This is where you can <a href="http://about.travis-ci.org/docs/user/build-configuration/">inject code and run custom scripts</a> before and after Travis builds your project. Paste in the following:</p>
+<div class="highlight"><pre><code class="text"># tell travis that this is an objective-c project
+language: objective-c
+
+# install xcodetest dependencies
+before_install: ./install_dependencies.sh
+
+# build via xcodetest
+script: ./build_and_run_unit_tests.sh MyApp MyAppTests
+</code></pre></div>
+<p>Travis uses a <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">default build script</a>, which is not sufficient enough for this purpose.</p>
+
+<p>Finally, commit and push everything to a Github repo that is monitored by Travis and go to the build page (<a href="http://travis-ci.org">tracis-ci.org</a> -> My Repositories) tap your project, wait for it to build, scroll down to the bottom and verify that it reads:</p>
+<div class="highlight"><pre><code class="text">=================
+Unit Tests Passed
+=================
+</code></pre></div>
+<p>It takes a little bit of configuration, but from now on, Travis is watching the project. Go and try it yourself; break one of the tests, commit and push and then wait. Cool, right?</p>
+
+<p>If it doesn&#39;t work, double check that:</p>
+
+<ul>
+<li>All the involved schemes (also the AppName scheme) are shared.</li>
+<li><code>install_dependencies.sh</code> is executable.</li>
+<li>Your .gitignore does not ignore xcworkspaces (the default Github .gitignore for Objective-C projects does that).</li>
+</ul>
+
+
+    
+
+    [<span class="categories">
+    
+    	travis-ci
+    
+    	kiwi
+    
+    	xcodetest
+    
+    	application unit tests
+    
+    	xcodebuild
+    
+    </span>]
+
+  </div>
+</div>
+
+    </div>
+
+    <div class="row">
+      <section id="footer">
+  <div class="social">
+	<a href="http://github.com/kaspermunck" target="_blank" class="github">
+		<i class="fa fa-github-alt fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
+		<i class="fa fa-twitter fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
+		<i class="fa fa-linkedin fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://stackoverflow.com/users/847174/muncken" target="_blank" class="stackoverflow">
+		<i class="fa fa-stack-overflow fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="goodbye">&copy; 2013 Kasper Munck<br />Powered by Jekyll, Bootstrap & Github</div>
+</section>
+    </div>
+  </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31685958-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  </body>
+</html>

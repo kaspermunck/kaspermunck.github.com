@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="Kasper Munck">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Adding Properties to Objective-C Categories</title>
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href='/assets/global-ab408f37102cbf85988b28a2e5cfc3cd.css' rel='stylesheet' type='text/css' />
+
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">Kasper Munck</a></h1>
+    </div>
+
+    <div class="row">
+      <div class="content">
+  <div id="post">
+  	<h2>Adding Properties to Objective-C Categories</h2>
+    <time class="date">November 02, 2012</time>
+    <h3>Categories, Properties and Ivars</h3>
+
+<p>Sometimes, subclassing causes unneccessary overhead (or is even discouraged by Apple, such as in the case of <code>NSArray</code> or <code>NSDictionary</code>). Especially if you need no more than a few extra properties. A category appears as a simpler solution, however, adding properties to a category is prohibited. Doing so causes one of the following errors, depending on which version of Xcode you are using:</p>
+
+<p><strong>No auto synthesis (before Xcode 4.4)</strong></p>
+<div class="highlight"><pre><code class="text">@synthesize not allowed in a category&#39;s implementation.
+</code></pre></div>
+<p><strong>Auto synthesis</strong></p>
+<div class="highlight"><pre><code class="text">Property &#39;myProperty&#39; requires method &#39;myProperty/setMyProperty&#39; to be defined [...] 
+</code></pre></div>
+<p>Manually implementing a getter for the property could be the solution. Consider an <code>NSManagedObject</code> subclass with <code>NSString</code> properties for given an family name, respectively. It is not unline that you would provide a property for getting the full name:</p>
+
+<div class="highlight"><pre><code class="objc"><span class="c1">// in the interface file</span>
+<span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">fullName</span><span class="p">;</span>
+
+<span class="c1">// in the implementation file</span>
+<span class="k">-</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">fullName</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">NSString</span> <span class="nl">stringWithFormat:</span><span class="s">@&quot;%@ %@&quot;</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">givenName</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">familyName</span><span class="p">)];</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>But, creating a setter is not as simple as creating a getter. An ivar for storing the value is required, and adding an ivar to a category will also result in an error:</p>
+<div class="highlight"><pre><code class="text">Instance variables may not be placed in categories.  
+</code></pre></div>
+<p>This is due to the fact that it is impossible to guarantee a unique ivar. This could potentially lead to a situation where setting a new value for property A causes the value of property B to change too, because of clashing ivars.</p>
+
+<p>Luckily, the Objective-C runtime has a feature called <a href="http://developer.apple.com/library/ios/#documentation/cocoa/conceptual/objectivec/Chapters/ocAssociativeReferences.html">associated objects</a>, which will <em>[…] simulate the addition of object instance variables to an existing class</em>. <a href="http://www.techpaa.com/2012/04/adding-properties-to-categories-and.html">This blog post at Techpaa</a> explains associated objects in details. In short, you will have to provide an object to associate the &quot;ivar&quot; with, a unique key by which it is identified, and a socalled association policy. This policy must obey the characteristics of the property you add (that is, atomicity, memory management etc.):</p>
+
+<p><strong>MyManagedObject+Additions.h</strong></p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">@property</span> <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">nonatomic</span><span class="p">)</span> <span class="n">NSString</span> <span class="o">*</span><span class="n">test</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>MyManagedObject+Additions.m</strong></p>
+
+<div class="highlight"><pre><code class="objc"><span class="n">NSString</span> <span class="k">const</span> <span class="o">*</span><span class="n">key</span> <span class="o">=</span> <span class="s">@&quot;my.very.unique.key&quot;</span><span class="p">;</span>
+
+<span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">setTest:</span><span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">test</span>
+<span class="p">{</span>
+    <span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">-</span> <span class="p">(</span><span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nf">test</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3>Updates</h3>
+
+<h4>12/03/2012</h4>
+
+<p>A great article about associated objects / references is now available at the <a href="http://blog.carbonfive.com/2012/11/27/monkey-patching-ios-with-objective-c-categories-part-ii-adding-instance-properties/">Carbon Emitter blog</a>.</p>
+
+<h4>11/12/2012</h4>
+
+<p>The article <a href="http://www.merowing.info/2012/02/associated-objects-for-more-advanced-categories/">Advanced categories with associated objects</a> by Krysztof Zablocki digs a little deeper with categories and associated objects. Absolutely worth a read.</p>
+
+
+    
+
+    [<span class="categories">
+    
+    	property
+    
+    	category
+    
+    	objective-c
+    
+    </span>]
+
+  </div>
+</div>
+
+    </div>
+
+    <div class="row">
+      <section id="footer">
+  <div class="social">
+	<a href="http://github.com/kaspermunck" target="_blank" class="github">
+		<i class="fa fa-github-alt fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
+		<i class="fa fa-twitter fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
+		<i class="fa fa-linkedin fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://stackoverflow.com/users/847174/muncken" target="_blank" class="stackoverflow">
+		<i class="fa fa-stack-overflow fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="goodbye">&copy; 2013 Kasper Munck<br />Powered by Jekyll, Bootstrap & Github</div>
+</section>
+    </div>
+  </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31685958-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  </body>
+</html>
