@@ -52,6 +52,14 @@ a {
     width: 15%;
 }
 
+#ad {
+
+}
+
+#ad h3 {
+	margin: 0;
+}
+
 #footer a:hover {
 	text-decoration: none;
 }

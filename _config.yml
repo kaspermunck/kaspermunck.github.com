@@ -2,7 +2,7 @@ permalink: /:year/:month/:title
 
 markdown: redcarpet
 
-exclude: ["README.md", "Rakefile"]
+exclude: ["README.md", "Rakefile", "Gemfile"]
 auto: false
 pygments: true
 safe: false
