@@ -9,7 +9,7 @@
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
-    <link href='/assets/global-94ab1a12efaf51eb4c0d11225b445aff.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-ccaabc621ff8b047f026721c64433aa1.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -20,7 +20,25 @@
     </div>
 
     <div class="row">
-      <div class="content">
+      <div class="row">
+  <div class="row">
+    <div class="span2" style="padding-left: 20px;">
+      <a href="https://itunes.apple.com/us/app/stock-gains/id867711886?ls=1&mt=8"><img src="/images/stocks-icon.png" alt="" title="Download on the App Store" /></a>
+    </div>
+
+    <div id="ad" class="span8">
+      <h3>Do you invest?</h3>
+      <p>Stock Gains monitors day-by-day changes, calculates your net gains after taxes and much more. <a href="https://itunes.apple.com/us/app/stock-gains/id867711886?ls=1&mt=8" title="Download on the App Store">Download on the App Store</a></p>
+      <!-- <p>I have created Stock Gains to help you track your gains. Download it on the <a href="#" title="Download on the App Store">App Store</a>.</p> -->
+    </div>
+  </div>
+</div>
+
+
+  <hr />
+
+
+<div class="content">
   <div id="post">
   	<h2>Building Projects and Running Tests with Xctool</h2>
     <time class="date">May 03, 2013</time>
@@ -63,7 +81,7 @@
 <p>The unit test target Xcode creates when checking Include Unit Tests runs a build script named <code>RunUnitTests</code>. When inspecting the output from xctool, you will notice this message:</p>
 <div class="highlight"><pre><code class="text">/Applications/Xcode.app/Contents/Developer/Tools/RunUnitTests:68: note: RunUnitTests exited without running tests because TEST_AFTER_BUILD was set to NO.
 </code></pre></div>
-<p>Although this does no harm at all, warnings should never be present. Click on MyApp project in Project Navigator and select MyAppTests target. Under <code>Build Phases -> Run Script</code> it says:</p>
+<p>Although this does no harm at all, warnings should never be present. Click on MyApp project in Project Navigator and select MyAppTests target. Under <code>Build Phases -&gt; Run Script</code> it says:</p>
 <div class="highlight"><pre><code class="text"># Run the unit tests in this test bundle.
 &quot;${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests&quot;
 </code></pre></div>

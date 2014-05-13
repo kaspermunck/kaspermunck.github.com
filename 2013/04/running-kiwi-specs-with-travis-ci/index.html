@@ -9,7 +9,7 @@
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
-    <link href='/assets/global-94ab1a12efaf51eb4c0d11225b445aff.css' rel='stylesheet' type='text/css' />
+    <link href='/assets/global-ccaabc621ff8b047f026721c64433aa1.css' rel='stylesheet' type='text/css' />
 
   </head>
   <body>
@@ -20,7 +20,25 @@
     </div>
 
     <div class="row">
-      <div class="content">
+      <div class="row">
+  <div class="row">
+    <div class="span2" style="padding-left: 20px;">
+      <a href="https://itunes.apple.com/us/app/stock-gains/id867711886?ls=1&mt=8"><img src="/images/stocks-icon.png" alt="" title="Download on the App Store" /></a>
+    </div>
+
+    <div id="ad" class="span8">
+      <h3>Do you invest?</h3>
+      <p>Stock Gains monitors day-by-day changes, calculates your net gains after taxes and much more. <a href="https://itunes.apple.com/us/app/stock-gains/id867711886?ls=1&mt=8" title="Download on the App Store">Download on the App Store</a></p>
+      <!-- <p>I have created Stock Gains to help you track your gains. Download it on the <a href="#" title="Download on the App Store">App Store</a>.</p> -->
+    </div>
+  </div>
+</div>
+
+
+  <hr />
+
+
+<div class="content">
   <div id="post">
   	<h2>Running iOS Application Unit Tests with Travis-CI</h2>
     <time class="date">April 12, 2013</time>
@@ -45,7 +63,7 @@
 <p>If you get an error similar to this:</p>
 <div class="highlight"><pre><code class="text">clang: error: no such file or directory: &#39;/Users/. . .prefix.pch.dia&#39;
 </code></pre></div>
-<p>when trying to run your tests, navigate to the <em>Pods</em> target and in <em>Pods-MyAppTests.xcconfig</em> in <em>Target Support Files -> Pods-MyAppTests</em>, change the line that reads:</p>
+<p>when trying to run your tests, navigate to the <em>Pods</em> target and in <em>Pods-MyAppTests.xcconfig</em> in <em>Target Support Files -&gt; Pods-MyAppTests</em>, change the line that reads:</p>
 <div class="highlight"><pre><code class="text">FRAMEWORK_SEARCH_PATHS = $(inherited) &quot;$(SDKROOT)/Developer/Library/Frameworks&quot; &quot;$(DEVELOPER_LIBRARY_DIR)/Frameworks&quot; &quot;$(inherited)&quot;
 </code></pre></div>
 <p>to</p>
@@ -187,7 +205,7 @@ script: ./build_and_run_unit_tests.sh MyApp MyAppTests
 </code></pre></div>
 <p>Travis uses a <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">default build script</a>, which is not sufficient enough for this purpose.</p>
 
-<p>Finally, commit and push everything to a Github repo that is monitored by Travis and go to the build page (<a href="http://travis-ci.org">tracis-ci.org</a> -> My Repositories) tap your project, wait for it to build, scroll down to the bottom and verify that it reads:</p>
+<p>Finally, commit and push everything to a Github repo that is monitored by Travis and go to the build page (<a href="http://travis-ci.org">tracis-ci.org</a> -&gt; My Repositories) tap your project, wait for it to build, scroll down to the bottom and verify that it reads:</p>
 <div class="highlight"><pre><code class="text">=================
 Unit Tests Passed
 =================
