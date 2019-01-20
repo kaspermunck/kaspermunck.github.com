@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="Kasper Munck">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Building Projects and Running Tests with Xctool</title>
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/assets/site-db8c3bf4ccacf37ed8816f2cea398db0b3cec9deecbbaeacf9e98c81fe035b16.css">
+    <link rel="stylesheet" type="text/css" href="/assets/pygments-c2cc9b68469dbe7baded99543504b39d11bcdcbe65a7f3eaf5d5281c1cac276c.css">
+    <link rel="stylesheet" type="text/css" href="/assets/bootstrap.min-8bc3557254f8038d2ac7e96917c7332cb81c974f3fe0e666a1279ff6f25385a0.css">
+    <link rel="stylesheet" type="text/css" href="/assets/bootstrap-responsive.min-76a06227945b3f8215623543deed9aef209aad313f90eb1ab3b7ed367d0c238c.css">
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">Kasper Munck</a></h1>
+    </div>
+
+    <div class="row">
+      <div class="content">
+  <div id="post">
+  	<h2>Building Projects and Running Tests with Xctool</h2>
+    <time class="date">May 03, 2013</time>
+    <p>Facebook recently released <a href="https://github.com/facebook/xctool">xctool</a>, a tool intended to replace Apple&#39;s <code>xcodebuild</code> (technically, it&#39;s a wrapper), which is the command line tool for building iOS and OS X projects.</p>
+
+<blockquote>
+<p>xctool is a replacement for Apple&#39;s xcodebuild that makes it easier to build and test iOS and Mac products. It&#39;s especially helpful for continuous integration.</p>
+</blockquote>
+
+<p>Xctool simplifies the process of building application unit tests (and a wide variety of other tasks!) from the command line significantly. Recently I wrote about <a href="http://kaspermunck.github.io/2013/04/running-kiwi-specs-with-travis-ci/">How To Run Application Unit Tests with Travis-CI</a>, addressing the issue with <a href="https://github.com/sgleadow/xcodetest">running application unit tests from the command line</a>. It turned out that additional effort is required to be able to run application unit tests from the command line. This is now past.</p>
+
+<p>To demonstrate how easy xctool is to use, we&#39;ll create a dummy sample app, MyApp, with a unit test target. We&#39;ll then both build the project and run it&#39;s test cases via xctool. Compared to the previous required effort (especially when using Jenkins/Hudson), it is surprisingly simple.</p>
+
+<h3>MyApp</h3>
+
+<p>Create a new Xcode project, MyApp, of type Single View Application and check Include Unit Tests.</p>
+
+<p><img src="/images/xctool-01-new-project.png" alt="New Project"></p>
+
+<p>Then add a new scheme, MyAppTests, for the unit test target (whose name is most likely to be MyAppTests as well).</p>
+
+<p><img src="/images/xctool-02-new-scheme.png" alt="New Project"></p>
+
+<p>xctool doesn&#39;t support building targets using <code>-target</code> as xcodebuild does, hence the need of schemes. It encourages you to indicate a scheme to build and then specify a desired target with the <code>-only</code> flag (and further details such as a certain test class and even a specific test case).</p>
+
+<h3>xctool</h3>
+
+<p>Clone the source <a href="https://github.com/facebook/xctool">from Github</a> into the root of MyApp project (the folder containing MyApp.xcodeproj). Then run:</p>
+
+<p><code>xctool/xctool.sh -project MyApp.xcodeproj -scheme MyApp build</code></p>
+
+<p>No additional setup is required. You can build and run tests, build the test target and run it against multiple SDK&#39;s, build the project or a workspace and a whole lot of other convenient things. To run the tests (that is, the unimplemented dummy test that&#39;s added by default), run:</p>
+
+<p><code>xctool/xctool.sh -project MyApp.xcodeproj -scheme MyAppTests test</code></p>
+
+<p>This runs all tests in MyAppTests in the simulator - including both logic- and application unit tests - without any problems. It&#39;s really that simple. I made a <a href="https://github.com/kaspermunck/xctool-travis-test">test project</a> to check it&#39;s <a href="https://travis-ci.org/kaspermunck/xctool-travis-test">compatibility with Travis-CI</a>, and (after a <a href="https://github.com/facebook/xctool/issues/11">minor fix</a>) it works very well, too.</p>
+
+<h3>Disable Unit Test Runner</h3>
+
+<p>The unit test target Xcode creates when checking Include Unit Tests runs a build script named <code>RunUnitTests</code>. When inspecting the output from xctool, you will notice this message:</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">/Applications/Xcode.app/Contents/Developer/Tools/RunUnitTests:68: note: RunUnitTests exited without running tests because TEST_AFTER_BUILD was set to NO.
+</code></pre></figure>
+<p>Although this does no harm at all, warnings should never be present. Click on MyApp project in Project Navigator and select MyAppTests target. Under <code>Build Phases -&gt; Run Script</code> it says:</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text"># Run the unit tests in this test bundle.
+&quot;${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests&quot;
+</code></pre></figure>
+<p>Since building of the project is now relying 100% on xctool, it is safe to remove this build script. Run the tests again and the message is no longer showing.</p>
+
+<h3>Build Errors</h3>
+
+<p>I experienced two errors when building MyApp project with the following command:</p>
+
+<p><code>xctool/xctool.sh -project MyApp.xcodeproj -scheme MyApp build
+</code></p>
+
+<p>The first was a code signing error:</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">Code Sign error: A valid provisioning profile matching the application&#39;s Identifier &#39;dk.muncken.MyApp&#39; could not be found
+</code></pre></figure>
+<p>You get rid of this either by signing the project properly or specifying the SDK to be the iphonesimulator (add <code>-sdk iphonesimulator</code>) and thereby omit code signing.</p>
+
+<p>The second was an architecture error:</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">No architectures to compile for (ONLY_ACTIVE_ARCH=YES, active arch=x86_64, VALID_ARCHS=armv7 armv7s).
+</code></pre></figure>
+<p>To get rid of this one, go to project settings and then under Architectures, change <a href="http://useyourloaf.com/blog/2010/04/21/xcode-build-active-architecture-only.html">Build Active Architecture Only</a> to <code>NO</code>.</p>
+
+
+    
+
+    [<span class="categories">
+    
+    	xctest
+    
+    	xcodebuild
+    
+    	unit tests
+    
+    	command line
+    
+    	travis-ci
+    
+    </span>]
+
+  </div>
+</div>
+
+    </div>
+
+    <div class="row">
+      <section id="footer">
+  <div class="social">
+	<a href="http://github.com/kaspermunck" target="_blank" class="github">
+		<i class="fa fa-github-alt fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
+		<i class="fa fa-twitter fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
+		<i class="fa fa-linkedin fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://stackoverflow.com/users/847174/muncken" target="_blank" class="stackoverflow">
+		<i class="fa fa-stack-overflow fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="goodbye">&copy; 2013 Kasper Munck<br />Powered by Jekyll, Bootstrap & Github</div>
+</section>
+    </div>
+  </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31685958-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  </body>
+</html>

@@ -5,7 +5,7 @@
     <meta name="author" content="Kasper Munck">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Kasper Munck</title>
+    <title>Unit Testing Singletons</title>
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
@@ -22,49 +22,38 @@
     </div>
 
     <div class="row">
-      <ul id="posts">
-  
-  <li class="post-listing">
-  	<a href="/2014/05/stock-gains-release">Releasing Stock Gains for iOS</a> <time class="date float-right">May 23, 2014</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2014/03/fixing-clang-error">Fix 'clang: unknown argument' error after updating to Xcode 5.1</a> <time class="date float-right">March 12, 2014</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/11/appetizer">Aarhus Appetizer: Starting a network for mobile developers</a> <time class="date float-right">November 06, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/05/unit-testing-singletons">Unit Testing Singletons</a> <time class="date float-right">May 22, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/05/xctool">Building Projects and Running Tests with Xctool</a> <time class="date float-right">May 03, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/04/apple-cocoa-camp-2013">Apple Cocoa Camp 2013</a> <time class="date float-right">April 26, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/04/running-kiwi-specs-with-travis-ci">Running iOS Application Unit Tests with Travis-CI</a> <time class="date float-right">April 12, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2013/04/preview-markdown-files-from-finder">Preview Markdown Files from Finder</a> <time class="date float-right">April 03, 2013</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2012/11/adding-properties-to-objective-c-categories">Adding Properties to Objective-C Categories</a> <time class="date float-right">November 02, 2012</time>
-  </li>
-  
-  <li class="post-listing">
-  	<a href="/2012/10/testing-a-view-controllers-iboutlet-connections">Testing a View Controller's IBOutlet Connections</a> <time class="date float-right">October 04, 2012</time>
-  </li>
-  
-</ul>
+      <div class="content">
+  <div id="post">
+  	<h2>Unit Testing Singletons</h2>
+    <time class="date">May 22, 2013</time>
+    <p>Whether to use singletons or not is a matter of religion and I won&#39;t be judging anyone. In my opinion there are certain situations where singletons just make our lives easier, hence I introduce a singleton every now and then, when appropriate. However, testing singletons is no easy task, which is why I tend to avoid it.</p>
+
+<p>In an attempt to make things easier, I created <a href="https://github.com/kaspermunck/KMSwizzleton">KMSwizzleton</a>, a helper class that aims to inject mock instances into a singleton object (assuming that you follow the <code>sharedInstance</code>).</p>
+
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc">id fakeSingleton = [OCMockObject mockForClass:[MySingleton class]]; // or any other mock library
+[KMSwizzleton stubSingleton:[MySingleton class] andReturnFakeInstance:fakeSingleton];
+id instance = [MySingleton sharedInstance]; // returns fakeSingleton</code></pre></figure>
+
+<p>This makes it possible to inject a stub or mock singleton into a closed method, which otherwise would be quite a hassle. It also gets rid of the need to expose a property injection method, dealing with a private class extension or to override <code>+sharedInstance</code> in a testable subclass of <code>MySingleton</code>. After <code>+sharedInstance</code> is called once, <code>MySingleton</code> is reverted to its original state.</p>
+
+
+    
+
+    [<span class="categories">
+    
+    	unit testing
+    
+    	singleton
+    
+    	sharedInstance
+    
+    	KMSwizzleton
+    
+    </span>]
+
+  </div>
+</div>
+
     </div>
 
     <div class="row">

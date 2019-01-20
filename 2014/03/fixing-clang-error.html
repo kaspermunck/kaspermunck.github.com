@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="author" content="Kasper Munck">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fix 'clang: unknown argument' error after updating to Xcode 5.1</title>
+
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/assets/site-db8c3bf4ccacf37ed8816f2cea398db0b3cec9deecbbaeacf9e98c81fe035b16.css">
+    <link rel="stylesheet" type="text/css" href="/assets/pygments-c2cc9b68469dbe7baded99543504b39d11bcdcbe65a7f3eaf5d5281c1cac276c.css">
+    <link rel="stylesheet" type="text/css" href="/assets/bootstrap.min-8bc3557254f8038d2ac7e96917c7332cb81c974f3fe0e666a1279ff6f25385a0.css">
+    <link rel="stylesheet" type="text/css" href="/assets/bootstrap-responsive.min-76a06227945b3f8215623543deed9aef209aad313f90eb1ab3b7ed367d0c238c.css">
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <h1><a href="/">Kasper Munck</a></h1>
+    </div>
+
+    <div class="row">
+      <div class="content">
+  <div id="post">
+  	<h2>Fix 'clang: unknown argument' error after updating to Xcode 5.1</h2>
+    <time class="date">March 12, 2014</time>
+    <h3>Error</h3>
+
+<p>Updating Xcode to version 5.1 seems to have an impact on certain ruby gems. In particular for me, when trying to install the <code>json</code> gem, the process exits with 1 and the following error (among others):</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">compiling generator.c
+linking shared-object json/ext/generator.bundle
+clang: error: unknown argument: &#39;-multiply_definedsuppress&#39; [-Wunused-command-line-argument-hard-error-in-future]
+clang: note: this will be a hard error (cannot be downgraded to a warning) in the future
+</code></pre></figure>
+<p>The message from clang is quite specific in that it states the error commited (<code>unknown argument</code>), which warning (<code>-Wunused-command-line-argument-hard-error-in-future</code>) and a note (&#39;this will be a hard error...&#39;). It is certain from the information given that this has something to do with clang and very likely something with warnings being treated as error.</p>
+
+<h3>Reason</h3>
+
+<p>The reason for this sudden error is found in the <a href="https://developer.apple.com/library/ios/releasenotes/DeveloperTools/RN-Xcode/Introduction/Introduction.html">Xcode Release Notes</a>:</p>
+
+<blockquote>
+<p>The Apple LLVM compiler in Xcode 5.1 treats unrecognized command-line options as errors. This issue has been seen when building both Python native extensions and Ruby Gems, where some invalid compiler options are currently specified.</p>
+</blockquote>
+
+<p>It seems that the newer version of the llvm compiler shipping with Xcode 5.1 is a little more restrictive when it comes to warnings. Furthermore it says that:</p>
+
+<blockquote>
+<p>Projects using invalid compiler options will need to be changed to remove those options.</p>
+</blockquote>
+
+<p>That is, developers should not expect this change to be reverted in the future.</p>
+
+<h3>Fix</h3>
+
+<p>While the real error lays in the particular gem, there is a temporary solution, which is to downgrade the error to a warning. This can be done by telling the compiler to not treat unused-command-line-arguments as errors:</p>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future gem install GemName
+</code></pre></figure>
+<p>As explicitly noted in the release notes, this is a temporary fix. It does, however, solve the immediate problem (not being able to install certain gems), and is sufficient untill the maintainers of the gems update their projects to not violate the treat-warnings-as-errors constraint.</p>
+
+
+    
+
+    [<span class="categories">
+    
+    	clang
+    
+    	unknown argument
+    
+    	xcode 5.1
+    
+    </span>]
+
+  </div>
+</div>
+
+    </div>
+
+    <div class="row">
+      <section id="footer">
+  <div class="social">
+	<a href="http://github.com/kaspermunck" target="_blank" class="github">
+		<i class="fa fa-github-alt fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
+		<i class="fa fa-twitter fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
+		<i class="fa fa-linkedin fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="social">
+	<a href="http://stackoverflow.com/users/847174/muncken" target="_blank" class="stackoverflow">
+		<i class="fa fa-stack-overflow fa-2x"></i>
+	</a>
+  </div>
+
+  <div class="goodbye">&copy; 2013 Kasper Munck<br />Powered by Jekyll, Bootstrap & Github</div>
+</section>
+    </div>
+  </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-31685958-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  </body>
+</html>
