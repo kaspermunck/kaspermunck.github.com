@@ -4,7 +4,7 @@ markdown: redcarpet
 
 exclude: ["README.md", "Rakefile", "Gemfile"]
 auto: false
-pygments: true
+highlighter: true
 safe: false
 
 title: "Kasper Munck"
@@ -13,6 +13,13 @@ author:
   email: kasper@muncken.dk
   github: kaspermunck
   twitter: kaspermunck
+
+assets:
+  sources:
+    - _assets/css
+
+plugins:
+  - jekyll-assets
 
 production_url: http://kaspermunck.github.io
 

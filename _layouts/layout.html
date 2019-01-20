@@ -9,11 +9,10 @@
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
-    {% css_asset_tag global %}
-      - /_assets/css/bootstrap.min.css
-      - /_assets/css/site.css
-      - /_assets/css/pygments.css
-    {% endcss_asset_tag %}
+    {% asset site.css %}
+    {% asset pygments.css %}
+    {% asset bootstrap.min.css %}
+    {% asset bootstrap-responsive.min.css %}
   </head>
   <body>
 
