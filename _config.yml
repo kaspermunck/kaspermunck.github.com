@@ -7,7 +7,7 @@ description: A personal blog
 markdown: kramdown
 kramdown:
   input: GFM
-permalink: /:year/:month/:day/:title/
+permalink: /:year/:month/:title/
 
 plugins:
   - jekyll-feed
