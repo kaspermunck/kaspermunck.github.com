@@ -4,31 +4,20 @@
     <meta charset="utf-8">
     <meta name="author" content="{{ site.author.name }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ page.title }}</title>
-
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/css/bootstrap-responsive.min.css">
-    <link rel="stylesheet" href="/fontawesome/font-awesome.min.css">
     <link rel="stylesheet" href="/assets/css/site.css">
     <link rel="stylesheet" href="/assets/css/pygments.css">
   </head>
   <body>
-
-  <div class="container">
-    <div class="row">
-      <h1><a href="/">{{ site.title }}</a></h1>
-    </div>
-
-    <div class="row">
-      {{ content }}
-    </div>
-
-    <div class="row">
+    <div class="container">
+      <header class="site-header">
+        <h1 class="site-title"><a href="/">{{ site.title }}</a></h1>
+      </header>
+      <main>
+        {{ content }}
+      </main>
       {% include footer.html %}
     </div>
-  </div>
-
-  {% include analytics.html %}
+    {% include analytics.html %}
   </body>
 </html>

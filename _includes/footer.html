@@ -1,21 +1,9 @@
-<section id="footer">
-  <div class="social">
-	<a href="http://github.com/kaspermunck" target="_blank" class="github">
-		<i class="icon-github-alt icon-2x"></i>
-	</a>
-  </div>
-
-  <div class="social">
-	<a href="http://twitter.com/kaspermunck" target="_blank" class="twitter">
-		<i class="icon-twitter icon-2x"></i>
-	</a>
-  </div>
-
-  <div class="social">
-	<a href="http://www.linkedin.com/profile/view?id=116928198" target="_blank" class="linkedin">
-		<i class="icon-linkedin icon-2x"></i>
-	</a>
-  </div>
-
-  <div class="goodbye">&copy; 2013 {{ site.author.name }}<br />Powered by Jekyll, Bootstrap & Github</div>
-</section>
+<footer id="footer">
+  <nav>
+    <a href="https://github.com/kaspermunck" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://twitter.com/kaspermunck" target="_blank" rel="noopener">Twitter</a>
+    <a href="https://www.linkedin.com/profile/view?id=116928198" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://stackoverflow.com/users/847174/muncken" target="_blank" rel="noopener">Stack Overflow</a>
+  </nav>
+  <div class="goodbye">&copy; {{ site.time | date: "%Y" }} {{ site.author.name }}</div>
+</footer>
