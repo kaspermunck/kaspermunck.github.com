@@ -1,0 +1,17 @@
+title: Kasper Munck
+author:
+  name: Kasper Munck
+description: A personal blog
+
+markdown: kramdown
+kramdown:
+  input: GFM
+permalink: /:year/:month/:day/:title/
+
+plugins:
+  - jekyll-feed
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor

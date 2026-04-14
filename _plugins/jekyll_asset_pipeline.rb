@@ -1,1 +1,1 @@
-require 'jekyll_asset_pipeline'
+# jekyll-asset-pipeline removed; assets are now served directly from /assets/css/
